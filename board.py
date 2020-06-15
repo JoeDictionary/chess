@@ -26,7 +26,7 @@ class Board():
 		self.black_pieces = self.white_pieces.lower()
 		# White
 		self.state[0] = [Rook(0, 0), Knight(0, 1), Bishop(0, 2), Queen(0, 3), King(0, 4), Bishop(0, 5), Knight(0, 6), Rook(0, 7)]
-		self.state[1] = [Rook(1, 0), Pawn(1, 1), Pawn(1, 2), Pawn(1, 3), Pawn(1, 4), Pawn(1, 5), Pawn(1, 6), Pawn(1, 7)]
+		self.state[1] = [Pawn(1, 0), Pawn(1, 1), Pawn(1, 2), Pawn(1, 3), Pawn(1, 4), Pawn(1, 5), Pawn(1, 6), Pawn(1, 7)]
 		# Black
 		self.state[6] = [Pawn(7, 0, False), Pawn(7, 1, False), Pawn(7, 2, False), Pawn(7, 3, False), Pawn(7, 4, False), Pawn(7, 5, False), Pawn(7, 6, False), Pawn(7, 7, False)]
 		self.state[7] = [Rook(6, 0, False), Knight(6, 1, False), Bishop(6, 2, False), Queen(6, 3, False), King(6, 4, False), Bishop(6, 5, False), Knight(6, 6, False), Rook(6, 7, False)]
@@ -36,14 +36,19 @@ class Board():
 		horizontal_line = ''.join([' - -' for _ in range(BOARD_SIZE)]) + ' -\n'
 
 		# Prints Letters on top of board
-		for letter_num in range(ord('a'), ord('h')+1):
-			printable += '   ' + chr(letter_num)
+		# TODO revert to non-dev mode
+		""" for letter_num in range(ord('a'), ord('h')+1):
+			printable += '   ' + chr(letter_num) """
+		for num in range(0, BOARD_SIZE):
+			printable += '   ' + str(num)
 
 		# Prints horizontal_line on top of board
 		printable += '\n ' + horizontal_line
 		# Prints board spaces
 		for index, y in enumerate(self.state):
-			printable += str(index + 1)
+			# TODO Revert to non-dev mode
+			""" printable += str(index + 1) """
+			printable += str(index)
 			for x in y:
 				# Prints vertical lines between spaces
 				printable += ' | ' + str(x)
@@ -81,17 +86,14 @@ class Board():
 		y_current, x_current = current
 		y_target, x_target = target
 		valid_moves = self.state[y_current][x_current].valid_moves(self.state)
-		print(valid_moves)
+		# print(valid_moves)
 
 		if target in valid_moves:
 			self.state[y_current][x_current].change_pos((y_target, x_target))
 			self.state[y_target][x_target] = self.state[y_current][x_current]
+			self.state[y_target][x_target].has_moved = True
 			self.state[y_current][x_current] = EMPTY_SQUARE
 		else: print("INVALID MOVE")
-
-	def position_viable(self, pos):
-		# if self.state
-		pass
 
 	def possible_moves(self, pos):
 		y_pos, x_pos = pos
@@ -132,12 +134,12 @@ class Board():
 
 
 board = Board()
-# board.move(('a', 2), ('a', 4))
-# board.move(('a', 4), ('a', 3))
-# board.move(('a', 3), ('d', 3))
-# board.move(('a', 7), ('a', 5))
-
 system('clear')
+
 board.move((1, 0), (3, 0))
+board.move((3, 0), (4, 0))
+board.move((4, 0), (5, 0))
+
+print(board.state[5][0].valid_moves(board.state))
+
 print(board)
-# print(board.state[1][0].valid_moves(board.state))
