@@ -8,6 +8,7 @@ class Piece():
 		self.x = column
 		self.is_white = is_white
 		self.has_moved = False
+		self.is_white_turn = True
 
 	def __str__(self):
 		return self.char
