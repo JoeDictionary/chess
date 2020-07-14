@@ -71,17 +71,6 @@ class Board():
 
 	def move(self, current, target):
 		""" Moves a piece at 'current' to 'target' if allowed. """
-		# y_current, x_current = self.to_coord(current)
-		# y_target, x_target = self.to_coord(target)
-
-		# current_square = self.state[y_current][x_current]
-		# target_square = self.state[y_target][x_target]
-
-		# if (y_target, x_target) in self.possible_moves((y_current, x_current)):
-		# 	# TODO Figure out how to move piece without destroyig´ng it
-		# 	self.state[y_current][x_current] = EMPTY_SQUARE
-		# 	self.state[y_target][x_target] = current_square
-		# else: print("MOVE: INVALID MOVE!")
 
 		y_current, x_current = current
 		y_target, x_target = target

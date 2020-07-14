@@ -1,0 +1,63 @@
+*, *:before, *:after {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	box-sizing: inherit;
+}
+
+div {
+	display: block;
+}
+
+.piece {
+	height: 80px;
+	width: 80px;
+	display: inherit;
+}
+
+.board {
+	display: table;
+	border: solid 2px black;
+	margin-top: 5%;
+	margin-left: 5%;
+}
+
+.row div {
+	background-color: #f0d9b5;
+	display: table-cell;
+	height: 80px;
+	width: 80px;
+	/* border: solid black; */
+}
+
+.row:nth-child(even) div:nth-child(odd){
+	background-color: #b58863;
+}
+
+.row:nth-child(odd) div:nth-child(even) {
+	background-color: #b58863;
+}
+
+.row {
+	display: table-row;
+	/* display: block; */
+}
+
+
+
+
+/* DRAG AND DROP CLASSES */
+.hold {
+}
+
+.hovered {
+	box-shadow: inset 0 0 3px 3px rgb(82, 107, 40);
+}
+
+.dragHovered {
+	border: dashed black;
+}
+
+.invisible {
+	display: none;
+}

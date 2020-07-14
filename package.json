@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-	"test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "webpack-dev-server",
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -16,5 +18,16 @@
   "bugs": {
     "url": "https://github.com/JoeDictionary/chess/issues"
   },
-  "homepage": "https://github.com/JoeDictionary/chess#readme"
+  "homepage": "https://github.com/JoeDictionary/chess#readme",
+  "devDependencies": {
+    "css-loader": "^3.6.0",
+    "style-loader": "^1.2.1",
+    "ts-loader": "^7.0.5",
+    "typedoc": "^0.17.8",
+    "typescript": "^3.9.6",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {}
 }
