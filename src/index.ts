@@ -13,9 +13,7 @@ chessBoard.insertPiece(king);
 chessBoard.insertPiece(rookie);
 
 debugBtn?.addEventListener('click', (e) => {
-	// console.log(rookie.domElement.id);
 	console.log(chessBoard.state)
-	console.log(king.getValidMoves(chessBoard.state))
 });
 
 
