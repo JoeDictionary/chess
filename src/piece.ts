@@ -11,7 +11,8 @@ import {
 } from './reusable_moves';
 const IMG_SIZE = '80px';
 
-export class Piece {
+// TODO Change class to abstract
+export abstract class Piece {
   x: number;
   y: number;
   isWhite: boolean;
@@ -19,7 +20,9 @@ export class Piece {
   validMoveCache: move[];
 
   imgPath: string;
-  domElement: HTMLImageElement;
+	domElement: HTMLImageElement;
+	
+	abstract getValidMoves(boardState: (Piece | undefined)[][]): move[];
 
   constructor(y: number, x: number, isWhite: boolean = true, image: String) {
     this.y = y;

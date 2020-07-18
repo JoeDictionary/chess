@@ -1,5 +1,5 @@
 import { Piece, Pawn, Knight, Rook, Bishop, Queen, King } from './piece';
-import { move, subPiece } from './declarations';
+import { move } from './declarations';
 
 export const BOARD_SIZE = 8;
 export const EMPTY = undefined;
@@ -85,7 +85,7 @@ export class Board {
   }
 
   movePiece(p: Piece, toY: number, toX: number) {
-    if (!this.isMoveValid({ y: toY, x: toX }, p as subPiece)) return;
+    if (!this.isMoveValid({ y: toY, x: toX }, p as Piece)) return;
 
     const [fromY, fromX] = [p.y, p.x];
     // Removes piece on target square.
@@ -129,7 +129,7 @@ export class Board {
     }
   }
 
-  isMoveValid({ y, x }: move, piece: subPiece) {
+  isMoveValid({ y, x }: move, piece: Piece) {
     const validPieceMoves = piece.getValidMoves(this.state);
     for (let move of validPieceMoves) {
       if (move.y === y && move.x === x) return true;
@@ -144,7 +144,7 @@ export class Board {
 		if (!target.className.includes('piece')) return;
 		
     const piece = this.getPiecefromEL(target) as Piece
-		this.highlightValidMoves(piece as subPiece);
+		this.highlightValidMoves(piece as Piece);
     target.className += ' hold';
     e.dataTransfer!.setData('text', [piece.y, piece.x].join(','));
     setTimeout(() => (target.className += ' invisible'), 0);
@@ -153,7 +153,7 @@ export class Board {
   dragEnd = (e: DragEvent) => {
     const target = e.target as HTMLImageElement;
 		if (!target.className.includes('piece')) return;
-		this.highlightValidMoves(this.getPiecefromEL(target) as subPiece, false);
+		this.highlightValidMoves(this.getPiecefromEL(target) as Piece, false);
     (e.target as HTMLImageElement).className = 'piece';
   };
 
@@ -196,7 +196,7 @@ export class Board {
     this.movePiece(drpPiece, tgtY, tgtX);
   };
 
-  highlightValidMoves(p: subPiece, highlight = true) {
+  highlightValidMoves(p: Piece, highlight = true) {
     if (highlight)
       for (let m of p.getValidMoves(this.state)) {
         this.squareElements[m.y][m.x].className += ' available';

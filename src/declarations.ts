@@ -1,7 +1,5 @@
 import { Pawn, Knight, Rook, Bishop, Queen, King, Piece } from './piece';
 
-export type subPiece = Pawn | Knight | Rook | Bishop | Queen | King
-
 export type board = (Piece | undefined)[][]
 
 export interface move {

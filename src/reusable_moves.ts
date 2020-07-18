@@ -1,6 +1,6 @@
 import { Piece, Pawn } from './piece';
 import { BOARD_SIZE, EMPTY } from './chessBoard';
-import { move, loop, board, subPiece } from './declarations';
+import { move, loop, board } from './declarations';
 
 export function vertDiagMoves(
   loops: loop[],
@@ -33,7 +33,7 @@ export function vertDiagMoves(
   return validMoves;
 }
 
-export function offsetMoves(offsets: { y: number; x: number }[], boardState: board, other: subPiece): move[] {
+export function offsetMoves(offsets: { y: number; x: number }[], boardState: board, other: Piece): move[] {
 	let validMoves: move[] = [];
 
 	for (let offset of offsets) {
