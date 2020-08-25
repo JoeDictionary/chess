@@ -7,41 +7,38 @@ export const EMPTY = undefined;
 const BACKLINE = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 
 export class Board {
-  board: HTMLDivElement;
-  boardContainer: HTMLElement;
-  squareElements: HTMLDivElement[][];
+  $board: HTMLDivElement;
+  $container: HTMLElement;
+  $squares: HTMLDivElement[][];
   state: (Piece | undefined)[][];
 
-  /**
-   * @param boardContainer  HTMLElement to which the chessboard will be appended.
-   *
-   */
-  constructor(boardContainer: HTMLElement) {
-    this.boardContainer = boardContainer;
+  constructor($boardContainer: HTMLElement) {
+    this.$container = $boardContainer;
     // Holds each div that makes up a single square on the chessboard for later reference
-    this.squareElements = Array(8)
+    this.$squares = Array(8)
       .fill(0)
-      .map(() => new Array(8));
+			.map(() => new Array(8));
+			
     this.state = Array(8)
       .fill(0)
       .map(() => new Array(8));
     // Holds the DOM-Elements making up the board. Gets appended to 'boardContainer'.
-    this.board = document.createElement('div');
+    this.$board = document.createElement('div');
     let row = document.createElement('div');
     let square = document.createElement('div');
 
-    this.board.className = 'board';
+    this.$board.className = 'board';
     row.className = 'row';
     square.className = 'square';
 
-    this.board.addEventListener('dragenter', this.dragEnter);
-    this.board.addEventListener('dragleave', this.dragLeave);
-    this.board.addEventListener('dragover', (e) => {
+    this.$board.addEventListener('dragenter', this.dragEnter);
+    this.$board.addEventListener('dragleave', this.dragLeave);
+    this.$board.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
-    this.board.addEventListener('drop', this.dragDrop);
-    this.board.addEventListener('dragstart', this.dragStart);
-    this.board.addEventListener('dragend', this.dragEnd);
+    this.$board.addEventListener('drop', this.dragDrop);
+    this.$board.addEventListener('dragstart', this.dragStart);
+    this.$board.addEventListener('dragend', this.dragEnd);
 
     for (let y = 0; y < 8; y++) {
       let rowDiv = row.cloneNode();
@@ -49,21 +46,14 @@ export class Board {
         let squareDiv = square.cloneNode() as HTMLDivElement;
         squareDiv.className = 'square';
         squareDiv.dataset.x = x.toString();
-        squareDiv.dataset.y = y.toString();
-        /* 				
-        squareDiv.addEventListener('dragenter', this.dragEnter);
-        squareDiv.addEventListener('dragleave', this.dragLeave);
-        squareDiv.addEventListener('dragover', (e) => {
-          e.preventDefault();
-        });
-        squareDiv.addEventListener('drop', this.dragDrop);
- */
+				squareDiv.dataset.y = y.toString();
+				
         rowDiv.appendChild(squareDiv);
-        this.squareElements[y][x] = squareDiv;
+        this.$squares[y][x] = squareDiv;
       }
-      this.board.appendChild(rowDiv);
+      this.$board.appendChild(rowDiv);
     }
-    boardContainer.appendChild(this.board);
+    $boardContainer.appendChild(this.$board);
   }
 
   removePiece(y: number, x: number) {
@@ -75,17 +65,17 @@ export class Board {
   }
 
   insertPiece(piece: Piece) {
-    let x = piece.x;
     let y = piece.y;
+    let x = piece.x;
     if (this.state[y][x] !== EMPTY) {
       this.removePiece(y, x);
     }
-    this.squareElements[y][x].appendChild(piece.domElement);
+    this.$squares[y][x].appendChild(piece.domElement);
     this.state[y][x] = piece;
   }
 
   movePiece(p: Piece, toY: number, toX: number) {
-    if (!this.isMoveValid({ y: toY, x: toX }, p as Piece)) return;
+    if (!this.isMoveValid({ y: toY, x: toX }, p)) return;
 
     const [fromY, fromX] = [p.y, p.x];
     // Removes piece on target square.
@@ -99,7 +89,7 @@ export class Board {
     this.state[fromY][fromX] = undefined;
 
     // Append domElement of moved piece to target square.
-    this.squareElements[toY][toX].appendChild(p.domElement as HTMLImageElement);
+    this.$squares[toY][toX].appendChild(p.domElement as HTMLImageElement);
   }
 
   initPieces() {
@@ -113,8 +103,8 @@ export class Board {
       let pawn = new Pawn(frontY, x, false);
       this.state[backY][x] = nonPawn;
       this.state[frontY][x] = pawn;
-      this.squareElements[backY][x].appendChild(nonPawn.domElement);
-      this.squareElements[frontY][x].appendChild(pawn.domElement);
+      this.$squares[backY][x].appendChild(nonPawn.domElement);
+      this.$squares[frontY][x].appendChild(pawn.domElement);
     }
 
     for (let x = 0; x < 8; x++) {
@@ -124,8 +114,8 @@ export class Board {
       let pawn = new Pawn(frontY, x);
       this.state[backY][x] = nonPawn;
       this.state[frontY][x] = pawn;
-      this.squareElements[backY][x].appendChild(nonPawn.domElement);
-      this.squareElements[frontY][x].appendChild(pawn.domElement);
+      this.$squares[backY][x].appendChild(nonPawn.domElement);
+      this.$squares[frontY][x].appendChild(pawn.domElement);
     }
   }
 
@@ -199,11 +189,11 @@ export class Board {
   highlightValidMoves(p: Piece, highlight = true) {
     if (highlight)
       for (let m of p.getValidMoves(this.state)) {
-        this.squareElements[m.y][m.x].className += ' available';
+        this.$squares[m.y][m.x].className += ' available';
       }
     else
       for (let m of p.validMoveCache) {
-        this.squareElements[m.y][m.x].className = 'square';
+        this.$squares[m.y][m.x].className = 'square';
       }
 	}
 	

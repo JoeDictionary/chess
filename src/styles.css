@@ -19,7 +19,7 @@
 	margin-left: 5%;
 }
 
-.row div {
+.board-row div {
 	width: 80px;
 	min-width: 80px;
 	height: 80px;
@@ -39,21 +39,20 @@
 	display: table-cell;
 }
 
-.square {
+.board-square {
 	display: block;
 }
 
-.row:nth-child(even) div:nth-child(odd){
+.board-row:nth-child(even) div:nth-child(odd){
 	background-color: #b58863;
 }
 
-.row:nth-child(odd) div:nth-child(even) {
+.board-row:nth-child(odd) div:nth-child(even) {
 	background-color: #b58863;
 }
 
-.row {
+.board-row {
 	display: table-row;
-	/* display: block; */
 }
 
 

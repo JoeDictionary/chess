@@ -1,5 +1,5 @@
-import { BOARD_SIZE, EMPTY } from './LOGICchessBoard';
-import { coord, loop, BoardState } from './declarations';
+import { BOARD_SIZE, EMPTY } from './chessBoardModel';
+import { move, loop, BoardState } from './declarations';
 import {
   vertDiagMoves,
   rookMoves,
@@ -17,12 +17,12 @@ export abstract class Piece {
   y: number;
   isWhite: boolean;
   hasMoved: boolean;
-  validMoveCache: coord[];
+  validMoveCache: move[];
 
   imgPath: string;
 	domElement: HTMLImageElement;
 	
-	abstract getValidMoves(boardState: (Piece | undefined)[][]): coord[];
+	abstract getValidMoves(boardState: (Piece | undefined)[][]): move[];
 
   constructor(y: number, x: number, isWhite: boolean = true, image: String) {
     this.y = y;
@@ -73,8 +73,8 @@ export class Rook extends Piece {
     super(y, x, isWhite, image);
   }
 
-  getValidMoves(boardState: (Piece | undefined)[][]): coord[] {
-    let validMoves: coord[] = [];
+  getValidMoves(boardState: (Piece | undefined)[][]): move[] {
+    let validMoves: move[] = [];
 
     validMoves = vertDiagMoves(rookMoves(this), boardState);
 
@@ -94,7 +94,7 @@ export class Bishop extends Piece {
   }
 
   getValidMoves(boardState: (Piece | undefined)[][]) {
-    let validMoves: coord[] = [];
+    let validMoves: move[] = [];
     validMoves = vertDiagMoves(bishopMoves(this), boardState);
 
     this.validMoveCache = validMoves;
@@ -112,7 +112,7 @@ export class Knight extends Piece {
     super(row, column, isWhite, image);
   }
   getValidMoves(boardState: (Piece | undefined)[][]) {
-    let validMoves: coord[] = [];
+    let validMoves: move[] = [];
     validMoves = offsetMoves(knightMoveOffsets, boardState, this);
 
     this.validMoveCache = validMoves;
@@ -129,7 +129,7 @@ export class King extends Piece {
   ) {
     super(row, column, isWhite, image);
   }
-  getValidMoves(boardState: (Piece | undefined)[][]): coord[] {
+  getValidMoves(boardState: (Piece | undefined)[][]): move[] {
     let validMoves = offsetMoves(kingMoveOffsets, boardState, this);
     this.validMoveCache = validMoves;
     return validMoves;
@@ -146,7 +146,7 @@ export class Queen extends Piece {
     super(row, column, isWhite, image);
   }
   getValidMoves(boardState: (Piece | undefined)[][]) {
-    let validMoves: coord[] = [];
+    let validMoves: move[] = [];
 
     validMoves = validMoves.concat(
       vertDiagMoves(bishopMoves(this), boardState)
@@ -169,12 +169,12 @@ export class Pawn extends Piece {
   }
   // TODO Implement "en passant" nad pawn promotion
   getValidMoves(boardState: (Piece | undefined)[][]) {
-    let validMoves: coord[] = [];
+    let validMoves: move[] = [];
     const yOffset = this.isWhite ? -1 : 1;
 
-    const basicMoves: coord[] = [{ y: this.y + yOffset, x: this.x }];
+    const basicMoves: move[] = [{ y: this.y + yOffset, x: this.x }];
     if (!this.hasMoved) basicMoves.push({ y: this.y + 2 * yOffset, x: this.x });
-    const beatMoves: coord[] = [
+    const beatMoves: move[] = [
       { y: this.y + yOffset, x: this.x + 1 },
       { y: this.y + yOffset, x: this.x - 1 },
     ];

@@ -97,7 +97,7 @@
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "*, *:before, *:after {\r\n\tmargin: 0;\r\n\tpadding: 0;\r\n\tborder: 0;\r\n\tbox-sizing: inherit;\r\n}\r\n\r\n#test {\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tborder: solid black 5px;\r\n\t/* display: table-cell; */\r\n}\r\n\r\n.board {\r\n\tdisplay: table;\r\n\tborder: solid 2px black;\r\n\tmargin-top: 5%;\r\n\tmargin-left: 5%;\r\n}\r\n\r\n.row div {\r\n\twidth: 80px;\r\n\tmin-width: 80px;\r\n\theight: 80px;\r\n\tmin-height: 80px;\r\n\tbackground-color: #f0d9b5;\r\n\tdisplay: table-cell;\r\n\r\n\t-moz-user-select: none;\r\n\t-webkit-user-drag: none;\r\n\t-webkit-user-select: none;\r\n\t/* -ms-user-select: none; */\r\n}\r\n\r\n.piece {\r\n\theight: 80px;\r\n\twidth: 80px;\r\n\tdisplay: table-cell;\r\n}\r\n\r\n.square {\r\n\tdisplay: block;\r\n}\r\n\r\n.row:nth-child(even) div:nth-child(odd){\r\n\tbackground-color: #b58863;\r\n}\r\n\r\n.row:nth-child(odd) div:nth-child(even) {\r\n\tbackground-color: #b58863;\r\n}\r\n\r\n.row {\r\n\tdisplay: table-row;\r\n\t/* display: block; */\r\n}\r\n\r\n\r\n/* DRAG AND DROP CLASSES */\r\n.hold {\r\n}\r\n\r\n.hovered {\r\n\tbox-shadow: inset 0 0 3px 3px rgb(82, 107, 40);\r\n}\r\n\r\n.dragHovered {\r\n\tborder: dashed black;\r\n}\r\n\r\n.invisible {\r\n\tdisplay: none;\r\n}\r\n\r\nbutton {\r\n\twidth: 100px;\r\n\theight: 50px;\r\n}", ""]);
+exports.push([module.i, "*, *:before, *:after {\r\n\tmargin: 0;\r\n\tpadding: 0;\r\n\tborder: 0;\r\n\tbox-sizing: inherit;\r\n}\r\n\r\n#test {\r\n\twidth: 50px;\r\n\theight: 50px;\r\n\tborder: solid black 5px;\r\n\t/* display: table-cell; */\r\n}\r\n\r\n.board {\r\n\tdisplay: table;\r\n\tborder: solid 2px black;\r\n\tmargin-top: 5%;\r\n\tmargin-left: 5%;\r\n}\r\n\r\n.board-row div {\r\n\twidth: 80px;\r\n\tmin-width: 80px;\r\n\theight: 80px;\r\n\tmin-height: 80px;\r\n\tbackground-color: #f0d9b5;\r\n\tdisplay: table-cell;\r\n\r\n\t-moz-user-select: none;\r\n\t-webkit-user-drag: none;\r\n\t-webkit-user-select: none;\r\n\t/* -ms-user-select: none; */\r\n}\r\n\r\n.piece {\r\n\theight: 80px;\r\n\twidth: 80px;\r\n\tdisplay: table-cell;\r\n}\r\n\r\n.board-square {\r\n\tdisplay: block;\r\n}\r\n\r\n.board-row:nth-child(even) div:nth-child(odd){\r\n\tbackground-color: #b58863;\r\n}\r\n\r\n.board-row:nth-child(odd) div:nth-child(even) {\r\n\tbackground-color: #b58863;\r\n}\r\n\r\n.board-row {\r\n\tdisplay: table-row;\r\n}\r\n\r\n\r\n/* DRAG AND DROP CLASSES */\r\n.hold {\r\n}\r\n\r\n.hovered {\r\n\tbox-shadow: inset 0 0 3px 3px rgb(82, 107, 40);\r\n}\r\n\r\n.available {\r\n\tbox-shadow: inset 0 0 3px 3px black;\r\n}\r\n\r\n.dragHovered {\r\n\tborder: dashed black;\r\n}\r\n\r\n.invisible {\r\n\tdisplay: none;\r\n}\r\n\r\nbutton {\r\n\twidth: 100px;\r\n\theight: 50px;\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -489,167 +489,391 @@ module.exports = function (list, options) {
 
 /***/ }),
 
-/***/ "./src/chessBoard.ts":
-/*!***************************!*\
-  !*** ./src/chessBoard.ts ***!
-  \***************************/
-/*! exports provided: BOARD_SIZE, EMPTY, Board */
+/***/ "./src/DOMchessBoard.ts":
+/*!******************************!*\
+  !*** ./src/DOMchessBoard.ts ***!
+  \******************************/
+/*! exports provided: ChessBoardDOM */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ChessBoardDOM", function() { return ChessBoardDOM; });
+/* harmony import */ var _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./LOGICchessBoard */ "./src/LOGICchessBoard.ts");
+
+const SQ = 'board-square'; // CSS class of normal square
+const HOVERED_SQ = 'hovered'; // CSS class of square hovered by a dragged item
+class ChessBoardDOM {
+    constructor($boardContaienr) {
+        this.$squares = [];
+        this.boardState = [];
+        // REVIEW Use that for the currently dragged Piece?
+        this.$currentlyDragged = undefined;
+        this.$container = $boardContaienr;
+        this.$board = this.createBoardDiv();
+        this.$container.appendChild(this.$board);
+        this.$board.addEventListener('dragenter', this.dragEnter);
+        this.$board.addEventListener('dragleave', this.dragLeave);
+        this.$board.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        this.$board.addEventListener('drop', this.dragDrop);
+        this.$board.addEventListener('dragstart', this.dragStart);
+        this.$board.addEventListener('dragend', this.dragEnd);
+    }
+    createSquareDiv() {
+        let $square = document.createElement('div');
+        $square.className = 'board-square';
+        // REVIEW Can I use this?
+        $square.dataset.type = 'square';
+        return $square;
+    }
+    createRowDiv() {
+        let $row = document.createElement('div');
+        $row.className = 'board-row';
+        return $row;
+    }
+    createBoardDiv() {
+        let $board = document.createElement('div');
+        this.$squares = new Array(8).fill(0).map((x) => new Array(8));
+        for (let y = 0; y < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_0__["BOARD_SIZE"]; y++) {
+            let $row = this.createRowDiv();
+            for (let x = 0; x < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_0__["BOARD_SIZE"]; x++) {
+                const $square = this.createSquareDiv();
+                $square.dataset.y = y + '';
+                $square.dataset.x = x + '';
+                this.$squares[y][x] = $square;
+                $row.appendChild($square);
+            }
+            $board.appendChild($row);
+        }
+        return $board;
+    }
+    isSquare(el) {
+        return el.dataset.type === 'square';
+    }
+    elCoords(el) {
+        return { y: parseInt(el.dataset.y), x: parseInt(el.dataset.x) };
+    }
+    removePiece(m) {
+        // REVIEW Consider adding state-property to class which holds the pieces / piece.domElements
+        if (this.$squares[m.y][m.x])
+            this.$squares[m.y][m.x].innerHTML = '';
+    }
+    insertPiece(p) {
+        let [y, x] = [p.y, p.x];
+        this.removePiece({ y: y, x: x });
+        this.$squares[y][x].appendChild(p.domElement);
+        p.domElement;
+    }
+    movePiece(p, to) {
+        this.removePiece({ y: to.y, x: to.x });
+        this.$squares[to.y][to.x].appendChild(p.domElement);
+    }
+    // TODO Change piece detection from css attributes to data-attributs
+    isPiece(el) {
+        console.log('isPiece');
+        return el.className.includes('piece');
+    }
+    test(g) {
+        console.log(g);
+    }
+    dragStart(e) {
+        this.test('OEUFF');
+        const target = e.target;
+        // if (!this.isPiece(target)) return;
+        const { y, x } = this.elCoords(target);
+    }
+    // TODO Unhighlight valid moves
+    dragEnd(e) {
+        console.log('end');
+        const target = e.target;
+        if (!this.isPiece(target))
+            return; // If not a chess piece, cancel execution
+        target.className = 'piece';
+    }
+    dragEnter(e) {
+        console.log('enter');
+        e.preventDefault();
+        let target = e.target;
+        if (this.isSquare(target))
+            this.highlightSq(target, HOVERED_SQ);
+    }
+    dragLeave(e) {
+        console.log('leave');
+        let target = e.target;
+        if (this.isSquare(target))
+            this.unHighlightSq(target);
+    }
+    dragDrop(e) {
+        const target = e.target;
+        const [tgtY, tgtX] = [
+            parseInt(target.dataset.y),
+            parseInt(target.dataset.x),
+        ];
+        const [dropY, dropX] = e
+            .dataTransfer.getData('text')
+            .split(',')
+            .map((x) => parseInt(x));
+        // TODO Implement observer to send message to parent? Or maybe pass state to board state to this class somehow
+    }
+    highlightSq(sq, cssClass) {
+        if (this.isSquare(sq)) {
+            sq.className += ' ' + cssClass;
+        }
+    }
+    unHighlightSq(sq) {
+        if (this.isSquare(sq)) {
+            sq.className = SQ;
+        }
+    }
+    flipBoard() { }
+}
+
+
+/***/ }),
+
+/***/ "./src/LOGICchessBoard.ts":
+/*!********************************!*\
+  !*** ./src/LOGICchessBoard.ts ***!
+  \********************************/
+/*! exports provided: BOARD_SIZE, EMPTY, ChessBoard */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BOARD_SIZE", function() { return BOARD_SIZE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EMPTY", function() { return EMPTY; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Board", function() { return Board; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ChessBoard", function() { return ChessBoard; });
 /* harmony import */ var _piece__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./piece */ "./src/piece.ts");
 
-// import { Piece } from "./piece"
 const BOARD_SIZE = 8;
 const EMPTY = undefined;
-const PAWN = 'P';
-const HORSE = 'H';
-const BISHOP = 'B';
-const ROOK = 'R';
-const QUEEN = 'Q';
-const KING = 'K';
 const BACKLINE = [_piece__WEBPACK_IMPORTED_MODULE_0__["Rook"], _piece__WEBPACK_IMPORTED_MODULE_0__["Knight"], _piece__WEBPACK_IMPORTED_MODULE_0__["Bishop"], _piece__WEBPACK_IMPORTED_MODULE_0__["Queen"], _piece__WEBPACK_IMPORTED_MODULE_0__["King"], _piece__WEBPACK_IMPORTED_MODULE_0__["Bishop"], _piece__WEBPACK_IMPORTED_MODULE_0__["Knight"], _piece__WEBPACK_IMPORTED_MODULE_0__["Rook"]];
-class Board {
-    /**
-     * @param boardContainer  HTMLElement to which the chessboard will be appended.
-     *
-     */
-    constructor(boardContainer) {
-        // TODO Make squares have coordinate-IDSs instead of data attributes
-        // TODO What does e.preventDefault() exactly do?
-        this.dragDrop = (e) => {
-            var _a;
-            const target = e.target;
-            const droppedEl = document.getElementById((_a = e.dataTransfer) === null || _a === void 0 ? void 0 : _a.getData('text'));
-            // Drop target coords
-            let trgtY;
-            let trgtX;
-            if (target.className.includes('piece')) {
-                [trgtY, trgtX] = target.id.split(',').map((x) => parseInt(x));
-            }
-            else if (target.className.includes('square')) {
-                target.className = 'square';
-                // Retrieve coords of target square from data-attributes.
-                trgtY = parseInt(target.dataset.y);
-                trgtX = parseInt(target.dataset.x);
-            }
-            if (droppedEl === null || droppedEl === void 0 ? void 0 : droppedEl.className.includes('piece')) {
-                // Retrieve coords of dropped element from id.
-                const [drpY, drpX] = droppedEl.id.split(',').map((x) => parseInt(x));
-                const trgtState = this.state[trgtY][trgtX];
-                const drpState = this.state[drpY][drpX];
-                // Cancel DnD action if target is an allied piece
-                if (trgtState && !drpState.isEnemy(trgtState)) {
-                    return;
-                }
-                this.movePiece(drpY, drpX, trgtY, trgtX);
-            }
-        };
-        this.boardContainer = boardContainer;
-        // Holds each div that makes up a single square on the chessboard for later reference
-        this.squareElements = Array(8)
-            .fill(0)
-            .map(() => new Array(8));
+// TODO Should data for the piece's image be stored here, in Piece class or somewhere else?
+class ChessBoard {
+    constructor() {
         this.state = Array(8)
             .fill(0)
             .map(() => new Array(8));
-        // Holds the DOM-Elements making up the board. Gets appended to 'boardContainer'.
-        this.board = document.createElement('div');
-        let row = document.createElement('div');
-        let square = document.createElement('div');
-        this.board.className = 'board';
-        row.className = 'row';
-        square.className = 'square';
-        for (let y = 0; y < 8; y++) {
-            let rowDiv = row.cloneNode();
-            for (let x = 0; x < 8; x++) {
-                let squareDiv = square.cloneNode();
-                squareDiv.className = 'square';
-                squareDiv.dataset.x = x.toString();
-                squareDiv.dataset.y = y.toString();
-                squareDiv.addEventListener('dragenter', this.dragEnter);
-                squareDiv.addEventListener('dragleave', this.dragLeave);
-                squareDiv.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                });
-                squareDiv.addEventListener('drop', this.dragDrop);
-                rowDiv.appendChild(squareDiv);
-                this.squareElements[y][x] = squareDiv;
-            }
-            this.board.appendChild(rowDiv);
-        }
-        boardContainer.appendChild(this.board);
     }
-    removePiece(y, x) {
-        // If not undefined in state array, remove dom element of that piece and destroy the instance by setting to indefined
-        if (this.state[y][x]) {
-            this.state[y][x].domElement.remove();
+    removePiece({ y, x }) {
+        if (this.state[y][x] instanceof _piece__WEBPACK_IMPORTED_MODULE_0__["Piece"]) {
             this.state[y][x] = undefined;
         }
     }
-    insertPiece(piece) {
-        let x = piece.x;
-        let y = piece.y;
-        if (this.state[y][x] !== EMPTY) {
-            this.removePiece(y, x);
-        }
-        this.squareElements[y][x].appendChild(piece.domElement);
-        this.state[y][x] = piece;
+    insertPiece(p) {
+        const [y, x] = [p.y, p.x];
+        this.removePiece({ y: y, x: x });
+        this.state[y][x] = p;
     }
-    movePiece(fromY, fromX, toY, toX) {
-        var _a, _b;
-        // Removes piece on target square.
-        this.removePiece(toY, toX);
-        // Change moved piece's internal state.
-        (_a = this.state[fromY][fromX]) === null || _a === void 0 ? void 0 : _a.move(toY, toX);
-        // Move piece in state array to new location by first copying piece to new location and deleting it in the old location.
-        this.state[toY][toX] = this.state[fromY][fromX];
-        this.state[fromY][fromX] = undefined;
-        // Append domElement of moved piece to target square.
-        this.squareElements[toY][toX].appendChild((_b = this.state[toY][toX]) === null || _b === void 0 ? void 0 : _b.domElement);
+    // TODO Test movePiece
+    movePiece(m, p) {
+        // Exit function if move is invalid
+        if (!this.isMoveValid(m, p))
+            return;
+        const [fromY, fromX] = [p.y, p.x];
+        this.state[m.y][m.x] = this.state[fromY][fromX];
+        this.removePiece({ y: fromY, x: fromX });
+        p.move(m.y, m.x);
     }
-    initPieces() {
-        // TODO Can i even do this?
-        // this.constructor(this.boardContainer)
-        for (let x = 0; x < 8; x++) {
-            const backY = 0;
-            const frontY = 1;
-            let nonPawn = new BACKLINE[x](backY, x, false);
-            let pawn = new _piece__WEBPACK_IMPORTED_MODULE_0__["Pawn"](frontY, x, false);
-            this.state[backY][x] = nonPawn;
-            this.state[frontY][x] = pawn;
-            this.squareElements[backY][x].appendChild(nonPawn.domElement);
-            this.squareElements[frontY][x].appendChild(pawn.domElement);
-        }
-        for (let x = 0; x < 8; x++) {
-            const backY = 7;
-            const frontY = 6;
-            let nonPawn = new BACKLINE[x](backY, x);
-            let pawn = new _piece__WEBPACK_IMPORTED_MODULE_0__["Pawn"](frontY, x);
-            this.state[backY][x] = nonPawn;
-            this.state[frontY][x] = pawn;
-            this.squareElements[backY][x].appendChild(nonPawn.domElement);
-            this.squareElements[frontY][x].appendChild(pawn.domElement);
+    // TODO test initGame
+    initGame() {
+        for (let i = 0; i < BOARD_SIZE; i++) {
+            /* this.state[0][i] = new BACKLINE[i](0, i, false); // black backline
+            this.state[7][i] = new BACKLINE[i](7, i, true); // white backline
+            this.state[1][i] = new Pawn(1, i, false); // black pawns
+                  this.state[6][i] = new Pawn(6, i, true); // white pawns */
+            this.insertPiece(new BACKLINE[i](0, i, false)); // black backline
+            this.insertPiece(new BACKLINE[i](7, i, true)); // white backline
+            this.insertPiece(new _piece__WEBPACK_IMPORTED_MODULE_0__["Pawn"](1, i, false)); // black pawns
+            this.insertPiece(new _piece__WEBPACK_IMPORTED_MODULE_0__["Pawn"](6, i, true)); // white pawns
         }
     }
-    dragEnter(e) {
-        e.preventDefault();
-        let targetClass = e.target.className;
-        if (targetClass === 'square') {
-            e.target.className += ' hovered';
+    isMoveValid({ y, x }, piece) {
+        const validPieceMoves = piece.getValidMoves(this.state);
+        for (let m of validPieceMoves) {
+            if (m.y === y && m.x === x)
+                return true;
         }
-    }
-    dragLeave(e) {
-        let target = e.target;
-        if (target.className.includes('square')) {
-            e.target.className = 'square';
-        }
+        return false;
     }
 }
+
+
+/***/ }),
+
+/***/ "./src/chessMoves.ts":
+/*!***************************!*\
+  !*** ./src/chessMoves.ts ***!
+  \***************************/
+/*! exports provided: vertDiagMoves, offsetMoves, bishopMoves, rookMoves, isOutOfBounds, knightMoveOffsets, kingMoveOffsets */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "vertDiagMoves", function() { return vertDiagMoves; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "offsetMoves", function() { return offsetMoves; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bishopMoves", function() { return bishopMoves; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rookMoves", function() { return rookMoves; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isOutOfBounds", function() { return isOutOfBounds; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "knightMoveOffsets", function() { return knightMoveOffsets; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "kingMoveOffsets", function() { return kingMoveOffsets; });
+/* harmony import */ var _piece__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./piece */ "./src/piece.ts");
+/* harmony import */ var _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./LOGICchessBoard */ "./src/LOGICchessBoard.ts");
+
+
+function vertDiagMoves(loops, boardState) {
+    let validMoves = [];
+    let y;
+    let x;
+    for (let loop of loops) {
+        y = loop.yStart;
+        x = loop.xStart;
+        for (; loop.compare(y, x);) {
+            const currY = loop.modifyY ? y : loop.yStart;
+            const currX = loop.modifyX ? x : loop.xStart;
+            const squareState = boardState[currY][currX];
+            if (squareState === _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["EMPTY"])
+                validMoves.push({ y: currY, x: currX });
+            else if (!loop.isWhite === squareState.isWhite) {
+                // TODO Consider using the classe's "this"
+                validMoves.push({ y: currY, x: currX });
+                break;
+            }
+            else
+                break;
+            y = loop.yIncrement ? y + 1 : y - 1;
+            x = loop.xIncrement ? x + 1 : x - 1;
+        }
+    }
+    return validMoves;
+}
+function offsetMoves(offsets, boardState, other) {
+    let validMoves = [];
+    for (let offset of offsets) {
+        const move = { y: other.y + offset.y, x: other.x + offset.x };
+        if (other instanceof _piece__WEBPACK_IMPORTED_MODULE_0__["Pawn"]) { }
+        if (isOutOfBounds(move))
+            continue;
+        const squareState = boardState[move.y][move.x];
+        if (other.isWhite === (squareState === null || squareState === void 0 ? void 0 : squareState.isWhite))
+            continue;
+        validMoves.push(move);
+    }
+    return validMoves;
+}
+function bishopMoves(other) {
+    return [
+        {
+            // Moves in positive y positive x direction
+            yStart: other.y + 1,
+            xStart: other.x + 1,
+            isWhite: other.isWhite,
+            compare: (y, x) => y < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"] && x < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"],
+            modifyY: true,
+            modifyX: true,
+            yIncrement: true,
+            xIncrement: true,
+        },
+        {
+            // Moves in positive y negative x direction
+            yStart: other.y + 1,
+            xStart: other.x - 1,
+            isWhite: other.isWhite,
+            compare: (y, x) => y < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"] && x > -1,
+            modifyY: true,
+            modifyX: true,
+            yIncrement: true,
+            xIncrement: false,
+        },
+        {
+            // Moves in negative y negative x direction
+            yStart: other.y - 1,
+            xStart: other.x - 1,
+            isWhite: other.isWhite,
+            compare: (y, x) => y > -1 && x > -1,
+            modifyY: true,
+            modifyX: true,
+            yIncrement: false,
+            xIncrement: false,
+        },
+        {
+            // Moves in negative y positive x direction
+            yStart: other.y - 1,
+            xStart: other.x + 1,
+            isWhite: other.isWhite,
+            compare: (y, x) => y > -1 && x < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"],
+            modifyY: true,
+            modifyX: true,
+            yIncrement: false,
+            xIncrement: true,
+        },
+    ];
+}
+function rookMoves(other) {
+    return [
+        {
+            yStart: other.y + 1,
+            xStart: other.x,
+            isWhite: other.isWhite,
+            compare: (y, _) => y < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"],
+            modifyY: true,
+            modifyX: false,
+            yIncrement: true,
+        },
+        {
+            yStart: other.y - 1,
+            xStart: other.x,
+            isWhite: other.isWhite,
+            compare: (y, x) => y > -1,
+            modifyY: true,
+            modifyX: false,
+            yIncrement: false,
+        },
+        {
+            yStart: other.y,
+            xStart: other.x + 1,
+            isWhite: other.isWhite,
+            compare: (y, x) => x < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"],
+            modifyY: false,
+            modifyX: true,
+            xIncrement: true,
+        },
+        {
+            yStart: other.y,
+            xStart: other.x - 1,
+            isWhite: other.isWhite,
+            compare: (y, x) => x > -1,
+            modifyY: false,
+            modifyX: true,
+            xIncrement: false,
+        },
+    ];
+}
+function isOutOfBounds({ y, x }) {
+    return !(y < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"] && y > -1 && x < _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_1__["BOARD_SIZE"] && x > -1);
+}
+const knightMoveOffsets = [
+    { y: -2, x: -1 },
+    { y: -2, x: 1 },
+    { y: 1, x: 2 },
+    { y: -1, x: 2 },
+    { y: 2, x: 1 },
+    { y: 2, x: -1 },
+    { y: 1, x: -2 },
+    { y: -1, x: -2 },
+];
+const kingMoveOffsets = [
+    { y: -1, x: -1 },
+    { y: -1, x: 0 },
+    { y: -1, x: 1 },
+    { y: 0, x: -1 },
+    { y: 0, x: 1 },
+    { y: 1, x: -1 },
+    { y: 1, x: 0 },
+    { y: 1, x: 1 },
+];
 
 
 /***/ }),
@@ -663,84 +887,22 @@ class Board {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _chessBoard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./chessBoard */ "./src/chessBoard.ts");
-/* harmony import */ var _piece__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./piece */ "./src/piece.ts");
-/* harmony import */ var _styles_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./styles.css */ "./src/styles.css");
-/* harmony import */ var _styles_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_styles_css__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./LOGICchessBoard */ "./src/LOGICchessBoard.ts");
+/* harmony import */ var _DOMchessBoard__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DOMchessBoard */ "./src/DOMchessBoard.ts");
+/* harmony import */ var _piece__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./piece */ "./src/piece.ts");
+/* harmony import */ var _styles_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./styles.css */ "./src/styles.css");
+/* harmony import */ var _styles_css__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_styles_css__WEBPACK_IMPORTED_MODULE_3__);
+
 
 
 
 let debugBtn = document.querySelector('#debug');
 let boardContainer = document.querySelector('.board-container');
-let chessBoard = new _chessBoard__WEBPACK_IMPORTED_MODULE_0__["Board"](boardContainer);
-let rookie = new _piece__WEBPACK_IMPORTED_MODULE_1__["Rook"](3, 0, true);
-chessBoard.initPieces();
-chessBoard.insertPiece(rookie);
-debugBtn === null || debugBtn === void 0 ? void 0 : debugBtn.addEventListener('click', (e) => {
-    // console.log(rookie.domElement.id);
-    console.log(chessBoard.state);
-    console.log(rookie.validMoves(chessBoard.state));
-});
-/*
-let board = document.querySelector('.board')!;
-let row = document.createElement('div');
-let square = document.createElement('div');
-row.className = 'row';
-square.className = 'square empty';
-
-for (let i = 0; i < 8; i++) {
-  row.appendChild(square.cloneNode());
-}
-for (let i = 0; i < 8; i++) {
-  board.appendChild(row.cloneNode(true));
-}
-*/
-/*
-let bishop = document.querySelector('.piece')!;
-bishop.addEventListener('dragstart', dragStart);
-bishop.addEventListener('dragend', dragEnd);
-
-function dragStart(e: Event) {
-  console.log(e.target);
-  (e.target as HTMLElement).className += ' hold';
-  setTimeout(() => ((e.target as HTMLElement).className = 'invisible'), 0);
-}
-
-function dragEnd(e: Event) {
-  console.log(e);
-  (e.target as HTMLElement).className = 'piece';
-} */
-/*
-let empties = document.querySelectorAll('.empty')!;
-
-for (const empty of empties) {
-  empty.addEventListener('dragenter', dragEnter);
-  empty.addEventListener('dragleave', dragLeave);
-  empty.addEventListener('drop', dragDrop);
-}
-
-function dragEnter(e: Event) {
-  e.preventDefault();
-  this.className += ' hovered';
-  // console.log('enter');
-}
-function dragLeave(e: Event) {
-  this.className = 'empty';
-  // console.log('leave');
-}
-function dragDrop(e: Event) {
-  console.log(e);
-    this.appendChild(bishop);
-    this.className = 'empty'
-  // console.log('drop');
-}
- */
-function monthDiff(d1, d2 = new Date()) {
-    let months = (d2.getFullYear() - d1.getFullYear()) * 12;
-    months -= d1.getMonth();
-    months += d2.getMonth();
-    return months <= 0 ? 0 : months;
-}
+let $board = new _DOMchessBoard__WEBPACK_IMPORTED_MODULE_1__["ChessBoardDOM"](boardContainer);
+let board = new _LOGICchessBoard__WEBPACK_IMPORTED_MODULE_0__["ChessBoard"]();
+debugBtn.addEventListener('click', () => console.log(board.state));
+let rookie = new _piece__WEBPACK_IMPORTED_MODULE_2__["Rook"](0, 0, true);
+$board.insertPiece(rookie);
 
 
 /***/ }),
@@ -749,7 +911,7 @@ function monthDiff(d1, d2 = new Date()) {
 /*!**********************!*\
   !*** ./src/piece.ts ***!
   \**********************/
-/*! exports provided: Piece, Rook, Bishop, Knight, King, Queen, Pawn */
+/*! exports provided: Piece, Rook, Bishop, Knight, King, Queen, Pawn, BetterPiece */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -761,44 +923,38 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "King", function() { return King; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Queen", function() { return Queen; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Pawn", function() { return Pawn; });
-/* harmony import */ var _chessBoard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./chessBoard */ "./src/chessBoard.ts");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BetterPiece", function() { return BetterPiece; });
+/* harmony import */ var _chessMoves__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./chessMoves */ "./src/chessMoves.ts");
 
 const IMG_SIZE = '80px';
+// TODO Change class to abstract
 class Piece {
     constructor(y, x, isWhite = true, image) {
-        // TODO Prevent ghost image on dragging.
-        this.dragStart = (e) => {
-            let target = e.target;
-            target.className += ' hold';
-            setTimeout(() => (target.className += ' invisible'), 0);
-            e.dataTransfer.setData('text', this.domElement.id);
-        };
-        this.dragEnd = (e) => {
-            e.target.className = 'piece';
-        };
         this.y = y;
         this.x = x;
         this.isWhite = isWhite;
         this.hasMoved = false;
+        this.validMoveCache = [];
         this.imgPath = this.isWhite
             ? `./chess_img/w${image}`
             : `./chess_img/b${image}`;
         this.domElement = document.createElement('img');
         this.domElement.className = 'piece';
         this.domElement.src = this.imgPath;
-        this.domElement.id = `${this.y},${this.x}`;
-        this.domElement.addEventListener('dragstart', this.dragStart);
-        this.domElement.addEventListener('dragend', this.dragEnd);
+        // this.domElement.id = `${this.y},${this.x}`;
+        this.domElement.dataset.y = this.y.toString();
+        this.domElement.dataset.x = this.x.toString();
+        // this.domElement.addEventListener('dragstart', this.dragStart);
+        // this.domElement.addEventListener('dragend', this.dragEnd);
     }
     move(y, x) {
         this.y = y;
         this.x = x;
-        this.domElement.id = ` ${y},${x}`;
+        // this.domElement.id = ` ${y},${x}`;
+        this.domElement.dataset.y = this.y.toString();
+        this.domElement.dataset.x = this.x.toString();
+        this.hasMoved = true;
     }
-    /**
-     * @param p Piece for which to check if it is of the opposite color.
-     * If undefined is passed, meaning the square is empty, returns false.
-     */
     isEnemy(p) {
         return p ? !(p.isWhite === this.isWhite) : false;
     }
@@ -810,108 +966,87 @@ class Rook extends Piece {
     constructor(y, x, isWhite = true, image = '_rook.svg') {
         super(y, x, isWhite, image);
     }
-    validMoves(boardState) {
+    getValidMoves(boardState) {
         let validMoves = [];
-        // Moves in positive y
-        for (let y = this.y + 1; y < _chessBoard__WEBPACK_IMPORTED_MODULE_0__["BOARD_SIZE"]; y++) {
-            const squareState = boardState[y][this.x];
-            if (squareState === _chessBoard__WEBPACK_IMPORTED_MODULE_0__["EMPTY"])
-                validMoves.push({ y: y, x: this.x });
-            else if (this.isEnemy(squareState)) {
-                validMoves.push({ y: y, x: this.x });
-                break;
-            }
-            else
-                break;
-        }
-        // Moves in negative y
-        for (let y = this.y - 1; y > -1; y--) {
-            const squareState = boardState[y][this.x];
-            if (squareState === _chessBoard__WEBPACK_IMPORTED_MODULE_0__["EMPTY"])
-                validMoves.push({ y: y, x: this.x });
-            else if (this.isEnemy(squareState)) {
-                validMoves.push({ y: y, x: this.x });
-                break;
-            }
-            else
-                break;
-        }
-        // Moves in positive x
-        for (let x = this.x + 1; x < _chessBoard__WEBPACK_IMPORTED_MODULE_0__["BOARD_SIZE"]; x++) {
-            console.log(x);
-            const squareState = boardState[this.y][x];
-            if (squareState === _chessBoard__WEBPACK_IMPORTED_MODULE_0__["EMPTY"])
-                validMoves.push({ y: this.y, x: x });
-            else if (this.isEnemy(squareState)) {
-                validMoves.push({ y: this.y, x: x });
-                break;
-            }
-            else
-                break;
-        }
-        // Moves in negative x
-        for (let x = this.x - 1; x > -1; x--) {
-            // console.log(x)
-            const squareState = boardState[this.y][x];
-            if (squareState === _chessBoard__WEBPACK_IMPORTED_MODULE_0__["EMPTY"])
-                validMoves.push({ y: this.y, x: x });
-            else if (this.isEnemy(squareState)) {
-                validMoves.push({ y: this.y, x: x });
-                break;
-            }
-            else
-                break;
-        }
+        validMoves = Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["vertDiagMoves"])(Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["rookMoves"])(this), boardState);
+        this.validMoveCache = validMoves;
         return validMoves;
-        // const yRanges = [
-        //   { from: this.y + 1, to: BOARD_SIZE, fn: (y: number) => ++y },
-        //   // { from: this.y - 1, to: -1, fn: (y: number) => --y },
-        // ];
-        // for (let r of yRanges) {
-        //   for (let y = r.from; y < r.to; r.fn(y)) {
-        //     const squareState = boardState[y][this.x];
-        //     if (squareState === EMPTY) validMoves.push({ y: y, x: this.x });
-        //     else if ((squareState as Piece).isWhite) {
-        //       validMoves.push({ y: y, x: this.x });
-        //       break;
-        //     } else break;
-        //   }
-        // }
-        // const xRanges = [
-        //   { from: this.x + 1, to: BOARD_SIZE, fn: (x: number) => ++x },
-        //   { from: this.x - 1, to: -1, fn: (x: number) => --x },
-        // ];
     }
 }
 class Bishop extends Piece {
     constructor(row, column, isWhite = true, image = '_bishop.svg') {
         super(row, column, isWhite, image);
     }
-    validMoves(boardState) { }
+    getValidMoves(boardState) {
+        let validMoves = [];
+        validMoves = Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["vertDiagMoves"])(Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["bishopMoves"])(this), boardState);
+        this.validMoveCache = validMoves;
+        return validMoves;
+    }
 }
 class Knight extends Piece {
     constructor(row, column, isWhite = true, image = '_knight.svg') {
         super(row, column, isWhite, image);
     }
-    validMoves(boardState) { }
+    getValidMoves(boardState) {
+        let validMoves = [];
+        validMoves = Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["offsetMoves"])(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["knightMoveOffsets"], boardState, this);
+        this.validMoveCache = validMoves;
+        return validMoves;
+    }
 }
 class King extends Piece {
     constructor(row, column, isWhite = true, image = '_king.svg') {
         super(row, column, isWhite, image);
     }
-    validMoves(boardState) { }
+    getValidMoves(boardState) {
+        let validMoves = Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["offsetMoves"])(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["kingMoveOffsets"], boardState, this);
+        this.validMoveCache = validMoves;
+        return validMoves;
+    }
 }
 class Queen extends Piece {
     constructor(row, column, isWhite = true, image = '_queen.svg') {
         super(row, column, isWhite, image);
     }
-    validMoves(boardState) { }
+    getValidMoves(boardState) {
+        let validMoves = [];
+        validMoves = validMoves.concat(Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["vertDiagMoves"])(Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["bishopMoves"])(this), boardState));
+        validMoves = validMoves.concat(Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["vertDiagMoves"])(Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["rookMoves"])(this), boardState));
+        this.validMoveCache = validMoves;
+        return validMoves;
+    }
 }
 class Pawn extends Piece {
     constructor(row, column, isWhite = true, image = '_pawn.svg') {
         super(row, column, isWhite, image);
     }
-    validMoves(boardState) { }
+    // TODO Implement "en passant" nad pawn promotion
+    getValidMoves(boardState) {
+        let validMoves = [];
+        const yOffset = this.isWhite ? -1 : 1;
+        const basicMoves = [{ y: this.y + yOffset, x: this.x }];
+        if (!this.hasMoved)
+            basicMoves.push({ y: this.y + 2 * yOffset, x: this.x });
+        const beatMoves = [
+            { y: this.y + yOffset, x: this.x + 1 },
+            { y: this.y + yOffset, x: this.x - 1 },
+        ];
+        for (let move of basicMoves) {
+            if (Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["isOutOfBounds"])(move) || boardState[move.y][move.x] !== undefined)
+                break;
+            validMoves.push(move);
+        }
+        for (let move of beatMoves) {
+            if (Object(_chessMoves__WEBPACK_IMPORTED_MODULE_0__["isOutOfBounds"])(move) || !this.isEnemy(boardState[move.y][move.x]))
+                continue;
+            validMoves.push(move);
+        }
+        this.validMoveCache = validMoves;
+        return validMoves;
+    }
+}
+class BetterPiece {
 }
 
 
