@@ -1,5 +1,5 @@
 import { Observer } from './observer';
-import { BoardState, coord } from './declarations';
+import { BoardState, coord, move } from './declarations';
 import { ChessBoard, BOARD_SIZE } from './LOGICchessBoard';
 import { ChessBoardDOM } from './DOMchessBoard';
 import { Piece, Rook, Knight, Bishop, Queen, King, Pawn } from './piece';
@@ -13,21 +13,33 @@ export class chessGame {
   dom: ChessBoardDOM;
   state: BoardState;
   // $state: HTMLDivElement[][];
-  pieces: Piece[];
+  pieces: Piece[]; // REVIEW Will I need this?
+  whiteTurn = true;
 
   constructor($boardContainer: HTMLElement) {
-    let moveObserver = new Observer((p: coord, to: coord) => this.movePiece(p, to));
     this.logic = new ChessBoard();
-    this.dom = new ChessBoardDOM($boardContainer, [moveObserver]);
+    this.dom = new ChessBoardDOM($boardContainer);
     this.state = this.logic.state;
-    // this.$state = this.$board.$squares;
     this.pieces = this.initGame();
+
+    let dropObserver = new Observer(({ p, to }: move) => {
+      this.movePiece(p, to);
+    });
+
+    let dragStartObserver = new Observer( (p: coord) => {
+			this.highlightValidMoves(p);
+		})
+
+		this.dom.dropSub.attach(dropObserver);
+		this.dom.dragStartSub.attach(dragStartObserver);
   }
 
   movePiece(p: coord, to: coord) {
     let piece = this.state[p.y][p.x]!;
-    if (!this.logic.isMoveValid(piece, to)) return; // If move is invalid don't move
+    if (!this.logic.isMoveValid(piece, to) || this.whiteTurn !== piece.isWhite)
+      return; // If move is invalid don't move
 
+    this.whiteTurn = !this.whiteTurn;
     this.logic.movePiece(p, to);
     this.dom.movePiece(p, to);
   }
@@ -62,5 +74,15 @@ export class chessGame {
         this.dom.removePiece({ y: y, x: x });
       }
     }
+  }
+
+  highlightValidMoves({ y, x }: coord) {
+		const p = this.state[y][x];
+		if (p instanceof Piece){
+			const moves = p.getValidMoves(this.state);
+			for (let m of moves) {
+				this.dom.highlightSq(this.dom.$squares[m.y][m.x])
+			}
+		}
   }
 }

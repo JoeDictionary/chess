@@ -1,8 +1,8 @@
-import { coord, Square } from './declarations';
+import { Subject } from './observer';
+import { coord, SQUARE, PIECE } from './declarations';
 import { BoardState } from './declarations';
 import { BOARD_SIZE } from './LOGICchessBoard';
 import { Piece } from './piece';
-import { Observer } from './observer';
 
 const SQ = 'board-square'; // CSS class of normal square
 const HOVERED_SQ = 'hovered'; // CSS class of square hovered by a dragged item
@@ -12,17 +12,15 @@ export class ChessBoardDOM {
   $board: HTMLDivElement;
   $squares: HTMLDivElement[][] = [];
   boardState: BoardState = [];
-  observers: Observer[];
+  dropSub: Subject = new Subject();
+  dragStartSub: Subject = new Subject();
 
-  // REVIEW Use that for the currently dragged Piece?
   private $currDrag: HTMLImageElement | undefined = undefined;
 
-  constructor($boardContaienr: HTMLElement, obs?: Observer[]) {
+  constructor($boardContaienr: HTMLElement) {
     this.$container = $boardContaienr;
     this.$board = this.createBoardDiv();
     this.$container.appendChild(this.$board);
-    this.observers = obs ? obs : [];
-
     this.$board.addEventListener('dragstart', this.dragStart);
     this.$board.addEventListener('dragend', this.dragEnd);
     this.$board.addEventListener('dragenter', this.dragEnter);
@@ -33,15 +31,10 @@ export class ChessBoardDOM {
     this.$board.addEventListener('drop', this.dragDrop);
   }
 
-  addObserver(o: Observer) {
-    this.observers.push(o);
-  }
-
   createSquareDiv(): HTMLDivElement {
     let $square = document.createElement('div');
     $square.className = 'board-square';
-    // REVIEW Can I use this?
-    $square.dataset.type = 'square';
+    $square.dataset.type = SQUARE;
     return $square;
   }
 
@@ -73,6 +66,10 @@ export class ChessBoardDOM {
     return el.dataset.type === 'square';
   }
 
+  isPiece(el: HTMLElement): boolean {
+    return el.dataset.type === PIECE;
+  }
+
   elCoords(el: HTMLElement): { y: number; x: number } {
     return { y: parseInt(el.dataset.y!), x: parseInt(el.dataset.x!) };
   }
@@ -84,7 +81,6 @@ export class ChessBoardDOM {
   }
 
   removePiece({ y, x }: coord) {
-    // REVIEW Consider adding state-property to class which holds the pieces / piece.domElements
     if (this.$squares[y][x]) this.$squares[y][x].innerHTML = '';
   }
 
@@ -107,22 +103,18 @@ export class ChessBoardDOM {
     this.unHighlightSq(this.$squares[to.y][to.x]);
   }
 
-  // TODO Change piece detection from css attributes to data-attributs
-  isPiece(el: HTMLImageElement): boolean {
-    return el.className.includes('piece');
-  }
-
   dragStart = (e: DragEvent) => {
     const target = e.target as HTMLImageElement;
-    if (!this.isPiece(target)) return;
-
-    const { y, x } = this.elCoords(target);
     this.$currDrag = target;
+
+		if (!this.isPiece(target)) return;
+		console.log(this.elCoords(this.$currDrag))
+    this.dragStartSub.notify(this.elCoords(this.$currDrag));
+    const { y, x } = this.elCoords(target);
   };
 
   // TODO Unhighlight valid moves
   dragEnd = (e: DragEvent) => {
-    console.log('end');
     const target = e.target! as HTMLImageElement;
     if (!this.isPiece(target)) return; // If not a chess piece, cancel execution
 
@@ -130,16 +122,14 @@ export class ChessBoardDOM {
   };
 
   dragEnter = (e: DragEvent) => {
-    console.log('enter');
     e.preventDefault();
     let target = e.target as HTMLDivElement;
-    if (this.isSquare(target)) this.highlightSq(target, HOVERED_SQ);
+    this.highlightSq(target, HOVERED_SQ);
   };
 
   dragLeave = (e: DragEvent) => {
-    console.log('leave');
     let target = e.target as HTMLDivElement;
-    if (this.isSquare(target)) this.unHighlightSq(target);
+    this.unHighlightSq(target);
   };
 
   dragDrop = (e: DragEvent) => {
@@ -147,24 +137,36 @@ export class ChessBoardDOM {
     const [tgtY, tgtX] = [
       parseInt(target.dataset.y!),
       parseInt(target.dataset.x!),
-		];
-    const droppedPiece = this.elCoords(this.$currDrag!);
-		
-		this.unHighlightSq(this.$squares[tgtY][tgtX])
-    this.observers.map((o) => o.update(droppedPiece, { y: tgtY, x: tgtX }));
+    ];
+    const droppedPieceCoord = this.elCoords(this.$currDrag!);
+
+		this.unhighlightAll();
+		this.dropSub.notify({ p: droppedPieceCoord, to: { y: tgtY, x: tgtX } });
     this.$currDrag = undefined;
   };
 
-  // TODO Write overloads for both functions using coordinates
-  private highlightSq(sq: HTMLDivElement, cssClass: string): void {
-    if (this.isSquare(sq)) sq.className += ' ' + cssClass;
+  highlightSq(el: HTMLElement, cssClass: string = 'hovered'): void {
+    let elParent = el.parentElement!;
+    if (this.isSquare(el)) el.className += ' ' + cssClass;
+    else if (this.isPiece(el) && this.isSquare(elParent))
+      elParent.className += ' ' + cssClass;
   }
 
-  private unHighlightSq(sq: HTMLDivElement): void {
-    if (this.isSquare(sq)) {
-      sq.className = SQ;
-    }
-  }
+  unHighlightSq(el: HTMLElement): void {
+    let elParent = el.parentElement!;
+    if (this.isSquare(el)) {
+      el.className = SQ;
+    } else if (this.isPiece(el) && this.isSquare(elParent))
+      elParent.className = SQ;
+	}
+	
+	unhighlightAll() {
+		for (let row of this.$squares) {
+			for (let sq of row) {
+				this.unHighlightSq(sq);
+			}
+		}
+	}
 
   flipBoard() {}
 }

@@ -1,5 +1,5 @@
 import { BOARD_SIZE, EMPTY } from './LOGICchessBoard';
-import { coord, loop, BoardState } from './declarations';
+import { coord, loop, BoardState, PIECE } from './declarations';
 import {
   vertDiagMoves,
   rookMoves,
@@ -39,7 +39,8 @@ export abstract class Piece {
     this.domElement.src = this.imgPath;
     // this.domElement.id = `${this.y},${this.x}`;
     this.domElement.dataset.y = this.y.toString();
-    this.domElement.dataset.x = this.x.toString();
+		this.domElement.dataset.x = this.x.toString();
+		this.domElement.dataset.type = PIECE;
 
     // this.domElement.addEventListener('dragstart', this.dragStart);
     // this.domElement.addEventListener('dragend', this.dragEnd);

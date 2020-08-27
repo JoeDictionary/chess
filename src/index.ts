@@ -18,7 +18,7 @@ let game = new chessGame(boardContainer as HTMLElement);
 let logic = new ChessBoard();
 
 debugBtn.addEventListener('click', () => {
-	game.movePiece({y: 1, x: 0}, {y: 2, x: 0})
+	game.dom.unhighlightAll();
 });
 
 debugBtn2.addEventListener('click', () => {});
