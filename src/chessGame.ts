@@ -26,16 +26,18 @@ export class chessGame {
       this.movePiece(p, to);
     });
 
-    let dragStartObserver = new Observer( (p: coord) => {
-			this.highlightValidMoves(p);
-		})
+    let dragStartObserver = new Observer((p: coord) => {
+      this.highlightValidMoves(p);
+    });
 
-		this.dom.dropSub.attach(dropObserver);
-		this.dom.dragStartSub.attach(dragStartObserver);
+    this.dom.dropSub.attach(dropObserver);
+    this.dom.dragStartSub.attach(dragStartObserver);
   }
 
+	// TODO Try to move most of it to LOGIC
   movePiece(p: coord, to: coord) {
     let piece = this.state[p.y][p.x]!;
+
     if (!this.logic.isMoveValid(piece, to) || this.whiteTurn !== piece.isWhite)
       return; // If move is invalid don't move
 
@@ -46,7 +48,7 @@ export class chessGame {
 
   removePiece(m: coord) {
     this.logic.removePiece(m);
-    this.dom.removePiece(m);
+    this.dom.emptySquare(m);
   }
 
   initGame(): Piece[] {
@@ -71,18 +73,18 @@ export class chessGame {
     for (let y = 0; y < BOARD_SIZE; y++) {
       for (let x = 0; x < BOARD_SIZE; x++) {
         this.logic.removePiece({ y: y, x: x });
-        this.dom.removePiece({ y: y, x: x });
+        this.dom.emptySquare({ y: y, x: x });
       }
     }
   }
 
   highlightValidMoves({ y, x }: coord) {
-		const p = this.state[y][x];
-		if (p instanceof Piece){
-			const moves = p.getValidMoves(this.state);
-			for (let m of moves) {
-				this.dom.highlightSq(this.dom.$squares[m.y][m.x])
-			}
-		}
+    const p = this.state[y][x];
+    if (p instanceof Piece) {
+      const moves = p.getValidMoves(this.state, this.logic.enPassant);
+      for (let m of moves) {
+        this.dom.highlightSq(this.dom.$squares[m.y][m.x]);
+      }
+    }
   }
 }

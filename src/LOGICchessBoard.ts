@@ -10,6 +10,7 @@ const BACKLINE = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 
 export class ChessBoard {
   state: BoardState;
+  enPassant: [coord, coord] | undefined;
 
   constructor() {
     this.state = Array(8)
@@ -18,8 +19,10 @@ export class ChessBoard {
   }
 
   removePiece({ y, x }: coord) {
-    if (this.state[y][x] instanceof Piece) {
-      this.state[y][x] = undefined;
+    let p = this.state[y][x];
+    if (p instanceof Piece) {
+      p.domElement.remove();
+      p = undefined;
     }
   }
 
@@ -29,32 +32,41 @@ export class ChessBoard {
     this.state[y][x] = p;
   }
 
-  movePiece(from: coord, to: coord) {
-    let p = this.state[from.y][from.x]!;
-    p.hasMoved = true;
-    this.state[to.y][to.x] = this.state[from.y][from.x];
-    this.removePiece({ y: from.y, x: from.x });
-    p.move(to.y, to.x);
-  }
+  movePiece(p: coord, to: coord) {
+    if (this.enPassant && this.enPassant[1].y === to.y && this.enPassant[1].x)
+			this.removePiece({ y: this.enPassant[0].y, x: this.enPassant[0].x });
 
-  // REVIEW Move this to chessGame?
-  initGame() {
-    for (let i = 0; i < BOARD_SIZE; i++) {
-      this.insertPiece(new BACKLINE[i](0, i, false)); // black backline
-      this.insertPiece(new BACKLINE[i](7, i, true)); // white backline
-      this.insertPiece(new Pawn(1, i, false)); // black pawns
-      this.insertPiece(new Pawn(6, i, true)); // white pawns
-    }
+    this.enPassant = this.checkEnPassant(p, to);
+    let piece = this.state[p.y][p.x]!;
+    this.state[to.y][to.x] = piece;
+    this.state[p.y][p.x] = undefined;
+		piece.move(to);
   }
 
   isMoveValid(p: coord, to: coord) {
     if (!(this.state[p.y][p.x] instanceof Piece)) return false; // False if there is no piece
+
     const piece = this.state[p.y][p.x]!;
-		const validPieceMoves = piece.getValidMoves(this.state);
-		
+
+    let validPieceMoves = piece.getValidMoves(this.state, this.enPassant);
+
     for (let m of validPieceMoves) {
       if (m.y === to.y && m.x === to.x) return true;
     }
     return false;
+  }
+
+  checkEnPassant(p: coord, to: coord): [coord, coord] | undefined {
+    let piece = this.state[p.y][p.x];
+    if (!(piece instanceof Pawn) || piece.hasMoved) return undefined;
+
+    const offset = piece.isWhite ? -1 : 1;
+
+    if (Math.abs(p.y - to.y) === 2)
+      return [
+        { y: to.y, x: to.x },
+        { y: p.y + offset, x: p.x },
+      ];
+    else return undefined;
   }
 }

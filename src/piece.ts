@@ -20,9 +20,12 @@ export abstract class Piece {
   validMoveCache: coord[];
 
   imgPath: string;
-	domElement: HTMLImageElement;
-	
-	abstract getValidMoves(boardState: (Piece | undefined)[][]): coord[];
+  domElement: HTMLImageElement;
+
+  abstract getValidMoves(
+    boardState: BoardState,
+    enPassant?: [coord, coord] | undefined
+  ): coord[];
 
   constructor(y: number, x: number, isWhite: boolean = true, image: String) {
     this.y = y;
@@ -39,14 +42,14 @@ export abstract class Piece {
     this.domElement.src = this.imgPath;
     // this.domElement.id = `${this.y},${this.x}`;
     this.domElement.dataset.y = this.y.toString();
-		this.domElement.dataset.x = this.x.toString();
-		this.domElement.dataset.type = PIECE;
+    this.domElement.dataset.x = this.x.toString();
+    this.domElement.dataset.type = PIECE;
 
     // this.domElement.addEventListener('dragstart', this.dragStart);
     // this.domElement.addEventListener('dragend', this.dragEnd);
   }
 
-  move(y: number, x: number) {
+  move({ y, x }: coord) {
     this.y = y;
     this.x = x;
     // this.domElement.id = ` ${y},${x}`;
@@ -74,7 +77,7 @@ export class Rook extends Piece {
     super(y, x, isWhite, image);
   }
 
-  getValidMoves(boardState: (Piece | undefined)[][]): coord[] {
+  getValidMoves(boardState: BoardState): coord[] {
     let validMoves: coord[] = [];
 
     validMoves = vertDiagMoves(rookMoves(this), boardState);
@@ -94,7 +97,7 @@ export class Bishop extends Piece {
     super(row, column, isWhite, image);
   }
 
-  getValidMoves(boardState: (Piece | undefined)[][]) {
+  getValidMoves(boardState: BoardState) {
     let validMoves: coord[] = [];
     validMoves = vertDiagMoves(bishopMoves(this), boardState);
 
@@ -112,7 +115,7 @@ export class Knight extends Piece {
   ) {
     super(row, column, isWhite, image);
   }
-  getValidMoves(boardState: (Piece | undefined)[][]) {
+  getValidMoves(boardState: BoardState) {
     let validMoves: coord[] = [];
     validMoves = offsetMoves(knightMoveOffsets, boardState, this);
 
@@ -130,7 +133,7 @@ export class King extends Piece {
   ) {
     super(row, column, isWhite, image);
   }
-  getValidMoves(boardState: (Piece | undefined)[][]): coord[] {
+  getValidMoves(boardState: BoardState): coord[] {
     let validMoves = offsetMoves(kingMoveOffsets, boardState, this);
     this.validMoveCache = validMoves;
     return validMoves;
@@ -146,7 +149,7 @@ export class Queen extends Piece {
   ) {
     super(row, column, isWhite, image);
   }
-  getValidMoves(boardState: (Piece | undefined)[][]) {
+  getValidMoves(boardState: BoardState) {
     let validMoves: coord[] = [];
 
     validMoves = validMoves.concat(
@@ -154,7 +157,7 @@ export class Queen extends Piece {
     );
     validMoves = validMoves.concat(vertDiagMoves(rookMoves(this), boardState));
 
-		this.validMoveCache = validMoves;
+    this.validMoveCache = validMoves;
     return validMoves;
   }
 }
@@ -168,35 +171,40 @@ export class Pawn extends Piece {
   ) {
     super(row, column, isWhite, image);
   }
-  // TODO Implement "en passant" nad pawn promotion
-  getValidMoves(boardState: (Piece | undefined)[][]) {
+  // TODO Implement "en passant" and pawn promotion
+  getValidMoves(boardState: BoardState, enPass: [coord, coord] | undefined) {
+    let sq: coord | void;
+    if (enPass) {
+      sq = enPass[1];
+    }
     let validMoves: coord[] = [];
     const yOffset = this.isWhite ? -1 : 1;
+    let basicMoves: coord[] = [{ y: this.y + yOffset, x: this.x }];
 
-    const basicMoves: coord[] = [{ y: this.y + yOffset, x: this.x }];
-    if (!this.hasMoved) basicMoves.push({ y: this.y + 2 * yOffset, x: this.x });
     const beatMoves: coord[] = [
       { y: this.y + yOffset, x: this.x + 1 },
       { y: this.y + yOffset, x: this.x - 1 },
     ];
 
-    for (let move of basicMoves) {
-      if (isOutOfBounds(move) || boardState[move.y][move.x] !== undefined)
-        break;
-      validMoves.push(move);
-    }
-    for (let move of beatMoves) {
-      if (isOutOfBounds(move) || !this.isEnemy(boardState[move.y][move.x]))
-        continue;
-      validMoves.push(move);
-    }
+    if (!this.hasMoved) basicMoves.push({ y: this.y + 2 * yOffset, x: this.x });
 
-		this.validMoveCache = validMoves;
+    for (let m of basicMoves) {
+      if (isOutOfBounds(m) || boardState[m.y][m.x] !== EMPTY) break;
+      validMoves.push(m);
+    }
+    for (let m of beatMoves) {
+			if (isOutOfBounds(m) || !this.isEnemy(boardState[m.y][m.x])) continue;
+      validMoves.push(m);
+		}
+		if (sq) {
+			for (let m of beatMoves) {
+				if (m.y === sq.y && m.x === sq.x) validMoves.push(m)
+			}
+		}
+
+    this.validMoveCache = validMoves;
     return validMoves;
   }
 }
 
-
-export class BetterPiece {
-	
-}
+export class BetterPiece {}

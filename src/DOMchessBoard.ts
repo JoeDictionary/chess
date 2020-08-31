@@ -80,13 +80,13 @@ export class ChessBoardDOM {
     else console.error('Number of elements on square is not 1.');
   }
 
-  removePiece({ y, x }: coord) {
+  emptySquare({ y, x }: coord) {
     if (this.$squares[y][x]) this.$squares[y][x].innerHTML = '';
   }
 
   insertPiece(p: Piece) {
     let [y, x] = [p.y, p.x];
-    this.removePiece({ y: y, x: x });
+    this.emptySquare({ y: y, x: x });
     this.$squares[y][x].appendChild(p.domElement);
     p.domElement;
   }
@@ -94,7 +94,7 @@ export class ChessBoardDOM {
   movePiece(p: coord, to: coord) {
     // if (p.y p.x)
     let piece = this.getPieceImage({ y: p.y, x: p.x })!;
-    this.removePiece({ y: to.y, x: to.x });
+    this.emptySquare({ y: to.y, x: to.x });
     this.$squares[to.y][to.x].appendChild(piece);
     piece.dataset.y! = to.y.toString();
     piece.dataset.x! = to.x.toString();
@@ -107,8 +107,8 @@ export class ChessBoardDOM {
     const target = e.target as HTMLImageElement;
     this.$currDrag = target;
 
-		if (!this.isPiece(target)) return;
-		console.log(this.elCoords(this.$currDrag))
+    if (!this.isPiece(target)) return;
+
     this.dragStartSub.notify(this.elCoords(this.$currDrag));
     const { y, x } = this.elCoords(target);
   };
@@ -140,11 +140,12 @@ export class ChessBoardDOM {
     ];
     const droppedPieceCoord = this.elCoords(this.$currDrag!);
 
-		this.unhighlightAll();
-		this.dropSub.notify({ p: droppedPieceCoord, to: { y: tgtY, x: tgtX } });
+    this.unhighlightAll();
+    this.dropSub.notify({ p: droppedPieceCoord, to: { y: tgtY, x: tgtX } });
     this.$currDrag = undefined;
   };
 
+	// TODO Use classList for changing classes.
   highlightSq(el: HTMLElement, cssClass: string = 'hovered'): void {
     let elParent = el.parentElement!;
     if (this.isSquare(el)) el.className += ' ' + cssClass;
@@ -158,15 +159,15 @@ export class ChessBoardDOM {
       el.className = SQ;
     } else if (this.isPiece(el) && this.isSquare(elParent))
       elParent.className = SQ;
-	}
-	
-	unhighlightAll() {
-		for (let row of this.$squares) {
-			for (let sq of row) {
-				this.unHighlightSq(sq);
-			}
-		}
-	}
+  }
+
+  unhighlightAll() {
+    for (let row of this.$squares) {
+      for (let sq of row) {
+        this.unHighlightSq(sq);
+      }
+    }
+  }
 
   flipBoard() {}
 }
