@@ -11,17 +11,14 @@ import {
 } from './chessMoves';
 const IMG_SIZE = '80px';
 
-let wMoveCache: coord[] | undefined = undefined;
-let bMoveCache: coord[] | undefined = undefined;
-
 // TODO Change class to abstract
 export abstract class Piece {
+	static enemyMoveCache: coord[] | undefined = undefined;
   x: number;
   y: number;
   isWhite: boolean;
   hasMoved: boolean;
   validMoveCache: coord[] | undefined;
-	static enemyMoveCache = wMoveCache;
 
   imgPath: string;
   domElement: HTMLImageElement;
