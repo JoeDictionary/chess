@@ -10,7 +10,7 @@ const BACKLINE = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 
 export class ChessBoard {
   state: BoardState;
-  enPassant: [coord, coord] | undefined;
+  enPass: [coord, coord] | undefined;
 
   constructor() {
     this.state = Array(8)
@@ -19,10 +19,10 @@ export class ChessBoard {
   }
 
   removePiece({ y, x }: coord) {
-    let p = this.state[y][x];
+		const p = this.state[y][x]
     if (p instanceof Piece) {
-      p.domElement.remove();
-      p = undefined;
+			p.domElement.remove();
+      this.state[y][x] = undefined;
     }
   }
 
@@ -33,14 +33,14 @@ export class ChessBoard {
   }
 
   movePiece(p: coord, to: coord) {
-    if (this.enPassant && this.enPassant[1].y === to.y && this.enPassant[1].x)
-			this.removePiece({ y: this.enPassant[0].y, x: this.enPassant[0].x });
+    if (this.enPass && this.enPass[1].y === to.y && this.enPass[1].x === to.x)
+      this.removePiece({ y: this.enPass[0].y, x: this.enPass[0].x });
 
-    this.enPassant = this.checkEnPassant(p, to);
+    this.enPass = this.checkEnPassant(p, to);
     let piece = this.state[p.y][p.x]!;
     this.state[to.y][to.x] = piece;
     this.state[p.y][p.x] = undefined;
-		piece.move(to);
+    piece.move(to);
   }
 
   isMoveValid(p: coord, to: coord) {
@@ -48,7 +48,7 @@ export class ChessBoard {
 
     const piece = this.state[p.y][p.x]!;
 
-    let validPieceMoves = piece.getValidMoves(this.state, this.enPassant);
+    let validPieceMoves = piece.getValidMoves(this.state, this.enPass);
 
     for (let m of validPieceMoves) {
       if (m.y === to.y && m.x === to.x) return true;
@@ -56,6 +56,11 @@ export class ChessBoard {
     return false;
   }
 
+  /**
+   *
+   * @param p
+   * @param to
+   */
   checkEnPassant(p: coord, to: coord): [coord, coord] | undefined {
     let piece = this.state[p.y][p.x];
     if (!(piece instanceof Pawn) || piece.hasMoved) return undefined;

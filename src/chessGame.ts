@@ -48,7 +48,7 @@ export class chessGame {
 
   removePiece(m: coord) {
     this.logic.removePiece(m);
-    this.dom.emptySquare(m);
+    // this.dom.emptySquare(m);
   }
 
   initGame(): Piece[] {
@@ -81,9 +81,9 @@ export class chessGame {
   highlightValidMoves({ y, x }: coord) {
     const p = this.state[y][x];
     if (p instanceof Piece) {
-      const moves = p.getValidMoves(this.state, this.logic.enPassant);
+      const moves = p.getValidMoves(this.state, this.logic.enPass);
       for (let m of moves) {
-        this.dom.highlightSq(this.dom.$squares[m.y][m.x]);
+        this.dom.highlightSq(this.dom.$squares[m.y][m.x], 'valid-move');
       }
     }
   }

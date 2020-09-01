@@ -1,5 +1,5 @@
 import { Subject } from './observer';
-import { coord, SQUARE, PIECE } from './declarations';
+import { coord, SQUARE, PIECE, Square } from './declarations';
 import { BoardState } from './declarations';
 import { BOARD_SIZE } from './LOGICchessBoard';
 import { Piece } from './piece';
@@ -62,6 +62,9 @@ export class ChessBoardDOM {
     return $board;
   }
 
+  /**
+   * Returns true if el or its parent element is a square
+   */
   isSquare(el: HTMLElement): boolean {
     return el.dataset.type === 'square';
   }
@@ -129,7 +132,7 @@ export class ChessBoardDOM {
 
   dragLeave = (e: DragEvent) => {
     let target = e.target as HTMLDivElement;
-    this.unHighlightSq(target);
+    this.unHighlightSq(target, ['hovered']);
   };
 
   dragDrop = (e: DragEvent) => {
@@ -145,26 +148,31 @@ export class ChessBoardDOM {
     this.$currDrag = undefined;
   };
 
-	// TODO Use classList for changing classes.
+  // TODO Use classList for changing classes.
   highlightSq(el: HTMLElement, cssClass: string = 'hovered'): void {
     let elParent = el.parentElement!;
-    if (this.isSquare(el)) el.className += ' ' + cssClass;
+    if (this.isSquare(el)) el.classList.add(cssClass);
     else if (this.isPiece(el) && this.isSquare(elParent))
-      elParent.className += ' ' + cssClass;
+      elParent.classList.add(cssClass);
   }
 
-  unHighlightSq(el: HTMLElement): void {
+  unHighlightSq(
+    el: HTMLElement,
+    cssClasses: string[] = ['hovered', 'valid-move']
+  ): void {
     let elParent = el.parentElement!;
-    if (this.isSquare(el)) {
-      el.className = SQ;
-    } else if (this.isPiece(el) && this.isSquare(elParent))
-      elParent.className = SQ;
+    let sq: HTMLElement;
+    if (this.isSquare(el)) sq = el;
+    else if (this.isPiece(el) && this.isSquare(elParent)) sq = elParent;
+    else return;
+
+    cssClasses.map((x) => sq.classList.remove(x));
   }
 
   unhighlightAll() {
     for (let row of this.$squares) {
       for (let sq of row) {
-        this.unHighlightSq(sq);
+        this.unHighlightSq(sq, ['hovered', 'valid-move']);
       }
     }
   }

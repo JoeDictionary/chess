@@ -11,28 +11,28 @@ import {
 } from './chessMoves';
 const IMG_SIZE = '80px';
 
+let wMoveCache: coord[] | undefined = undefined;
+let bMoveCache: coord[] | undefined = undefined;
+
 // TODO Change class to abstract
 export abstract class Piece {
   x: number;
   y: number;
   isWhite: boolean;
   hasMoved: boolean;
-  validMoveCache: coord[];
+  validMoveCache: coord[] | undefined;
+	static enemyMoveCache = wMoveCache;
 
   imgPath: string;
   domElement: HTMLImageElement;
-
-  abstract getValidMoves(
-    boardState: BoardState,
-    enPassant?: [coord, coord] | undefined
-  ): coord[];
 
   constructor(y: number, x: number, isWhite: boolean = true, image: String) {
     this.y = y;
     this.x = x;
     this.isWhite = isWhite;
     this.hasMoved = false;
-    this.validMoveCache = [];
+		this.validMoveCache = [];
+		
 
     this.imgPath = this.isWhite
       ? `./chess_img/w${image}`
@@ -40,14 +40,16 @@ export abstract class Piece {
     this.domElement = document.createElement('img');
     this.domElement.className = 'piece';
     this.domElement.src = this.imgPath;
-    // this.domElement.id = `${this.y},${this.x}`;
     this.domElement.dataset.y = this.y.toString();
     this.domElement.dataset.x = this.x.toString();
     this.domElement.dataset.type = PIECE;
-
-    // this.domElement.addEventListener('dragstart', this.dragStart);
-    // this.domElement.addEventListener('dragend', this.dragEnd);
   }
+
+  abstract getValidMoves(
+    boardState: BoardState,
+    enPassant?: [coord, coord] | undefined,
+    includeCastling?: boolean
+  ): coord[];
 
   move({ y, x }: coord) {
     this.y = y;
@@ -56,14 +58,36 @@ export abstract class Piece {
     this.domElement.dataset.y = this.y.toString();
     this.domElement.dataset.x = this.x.toString();
     this.hasMoved = true;
+    this.resetCache();
+  }
+
+  resetCache() {
+    this.validMoveCache = undefined;
+    Piece.enemyMoveCache = undefined;
+    console.log(Piece.enemyMoveCache);
+    console.log('Cache reset!');
   }
 
   isEnemy(p: Piece | undefined) {
     return p ? !(p.isWhite === this.isWhite) : false;
   }
 
-  changePos(pos: [number, number]) {
-    this.x, (this.y = pos[0]), pos[1];
+  enemyValidMoves(bStat: BoardState): coord[] {
+    let moves: coord[] = [];
+
+    for (let row of bStat) {
+      for (let p of row) {
+        if (p instanceof Piece && this.isEnemy(p)) {
+          moves = moves.concat(p.getValidMoves(bStat, undefined, false));
+        }
+      }
+    }
+
+    return moves;
+  }
+
+  isOcc(sq: coord, bStat: BoardState) {
+    return !!bStat[sq.y][sq.x];
   }
 }
 
@@ -133,10 +157,77 @@ export class King extends Piece {
   ) {
     super(row, column, isWhite, image);
   }
-  getValidMoves(boardState: BoardState): coord[] {
-    let validMoves = offsetMoves(kingMoveOffsets, boardState, this);
-    this.validMoveCache = validMoves;
+
+  getValidMoves(
+    bStat: BoardState,
+    en?: [coord, coord],
+    includeCastl = true
+  ): coord[] {
+    let validMoves = offsetMoves(kingMoveOffsets, bStat, this);
+
+    if (includeCastl) {
+      // Prevent infinte recursive calls when checking enemy king's moves
+      validMoves = validMoves.filter((x) => !this.isInCheck(x, bStat));
+      validMoves = validMoves.concat(this.getCastling(bStat));
+    }
     return validMoves;
+  }
+
+  getCastling(bStat: BoardState): coord[] {
+    let validMoves: coord[] = [];
+
+    if (!this.hasMoved) {
+      let y = this.isWhite ? 7 : 0;
+      let [lRook, rRook] = [bStat[y][0], bStat[y][7]];
+      let lCastl = {
+        rook: lRook!,
+        fst: { y: y, x: 3 },
+        snd: { y: y, x: 2 },
+        trd: { y: y, x: 1 },
+      };
+      let rCastl = {
+        rook: rRook!,
+        fst: { y: y, x: 5 },
+        snd: { y: y, x: 6 },
+      };
+
+      // Check whether left castle or right castle are valid
+      let castlValid = [lCastl, rCastl].map((c) => {
+        if (c.rook.hasMoved) return false;
+        // Check if squares which would be traversed by king are occupied or in check
+        for (let m of [c.fst, c.snd]) {
+          // console.log(this.isInCheck(m, bStat)
+          if (this.isOcc(m, bStat) || this.isInCheck(m, bStat)) {
+            return false;
+          }
+        }
+        return true;
+      });
+      // Check if third left-castle square is occupied (this square is not crossed by the king so it is not checked for eing in check)
+      if (this.isOcc(lCastl.trd, bStat)) castlValid[0] = false;
+
+      if (castlValid[0]) validMoves.push({ y: 7, x: 2 });
+      if (castlValid[1]) validMoves.push({ y: 7, x: 6 });
+      return validMoves;
+    } else return [];
+  }
+
+  isInCheck(
+    sq: coord = { y: this.y, x: this.x },
+    boardState: BoardState
+  ): boolean {
+    if (!Piece.enemyMoveCache) {
+      console.log('new enemyMoves');
+      Piece.enemyMoveCache = this.enemyValidMoves(boardState);
+    }
+
+    for (let m of Piece.enemyMoveCache!) {
+      // console.log(m, m.y === sq.y, m.x === sq.x);
+      if (m.y === sq.y && m.x === sq.x) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -173,10 +264,8 @@ export class Pawn extends Piece {
   }
   // TODO Implement "en passant" and pawn promotion
   getValidMoves(boardState: BoardState, enPass: [coord, coord] | undefined) {
-    let sq: coord | void;
-    if (enPass) {
-      sq = enPass[1];
-    }
+    let enSq: coord;
+    let enPiece: Piece;
     let validMoves: coord[] = [];
     const yOffset = this.isWhite ? -1 : 1;
     let basicMoves: coord[] = [{ y: this.y + yOffset, x: this.x }];
@@ -193,18 +282,21 @@ export class Pawn extends Piece {
       validMoves.push(m);
     }
     for (let m of beatMoves) {
-			if (isOutOfBounds(m) || !this.isEnemy(boardState[m.y][m.x])) continue;
+      if (isOutOfBounds(m) || !this.isEnemy(boardState[m.y][m.x])) continue;
       validMoves.push(m);
-		}
-		if (sq) {
-			for (let m of beatMoves) {
-				if (m.y === sq.y && m.x === sq.x) validMoves.push(m)
-			}
-		}
+    }
+
+    // enPassant
+    if (enPass) {
+      enSq = enPass[1];
+      enPiece = boardState[enPass[0].y][enPass[0].x]!;
+      for (let m of beatMoves) {
+        if (this.isEnemy(enPiece) && m.y === enSq.y && m.x === enSq.x)
+          validMoves.push(m);
+      }
+    }
 
     this.validMoveCache = validMoves;
     return validMoves;
   }
 }
-
-export class BetterPiece {}
