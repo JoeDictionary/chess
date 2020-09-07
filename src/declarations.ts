@@ -14,6 +14,13 @@ export interface coord {
 export interface move {
   p: coord;
   to: coord;
+  action?: chessAction;
+}
+
+export interface chessAction {
+  move?: move;
+  remove?: coord;
+  promote?: coord;
 }
 
 export interface loop {

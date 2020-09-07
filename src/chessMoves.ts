@@ -1,11 +1,8 @@
 import { Piece, Pawn } from './piece';
 import { BOARD_SIZE, EMPTY } from './LOGICchessBoard';
-import { coord, loop, BoardState } from './declarations';
+import { coord, loop, BoardState, move } from './declarations';
 
-export function vertDiagMoves(
-  loops: loop[],
-  boardState: BoardState
-) {
+export function vertDiagMoves(loops: loop[], boardState: BoardState) {
   let validMoves: coord[] = [];
   let y: number;
   let x: number;
@@ -33,19 +30,23 @@ export function vertDiagMoves(
   return validMoves;
 }
 
-export function offsetMoves(offsets: { y: number; x: number }[], boardState: BoardState, other: Piece): coord[] {
-	let validMoves: coord[] = [];
+export function offsetMoves(
+  offsets: { y: number; x: number }[],
+  boardState: BoardState,
+  other: Piece
+): move[] {
+  let validMoves: move[] = [];
 
-	for (let offset of offsets) {
-		const move: coord = { y: other.y + offset.y, x: other.x + offset.x };
+  for (let offset of offsets) {
+    const to: coord = { y: other.y + offset.y, x: other.x + offset.x };
 
-		if (other instanceof Pawn) {}
-		if (isOutOfBounds(move)) continue;
-		const squareState = boardState[move.y][move.x];
-		if (other.isWhite === squareState?.isWhite) continue;
-		validMoves.push(move);
-	}
-	return validMoves;
+    // if (other instanceof Pawn) {}
+    if (isOutOfBounds(to)) continue;
+    const sq = boardState[to.y][to.x];
+    if (other.isWhite === sq?.isWhite) continue; // If sq empty or piece on sq is same color as other continue
+    validMoves.push({p: {y: other.y, x: other.x}, to: to});
+  }
+  return validMoves;
 }
 
 export function bishopMoves(other: Piece): loop[] {

@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-</head>
-<body>
-	<!-- <div id="test"></div> -->
-	<div class="board-container"></div>
-	<button id="debug">Debug Button</button>
-	<button id="debug2">Debug Button 2</button>
-</body>
-<script src="./bundle.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- <div id="test"></div> -->
+    <div class="board-container"></div>
+    <button id="debug">Debug Button</button>
+    <button id="debug2">Debug Button 2</button>
 
+    <div id="promotion-modal" class="modal">
+			<div class="modal-content">
+				<h3>Pawn Promotion</h3>
+				<div class="radio-group">
 
+					<div class="promotion-radio">
+						<input type="radio" value="Queen" id="queen" name="promotion" checked/>
+						<label for="queen">Queen</label>
+					</div>
+
+					<div class="promotion-radio">
+						<input type="radio" value="Bishop" id="bishop" name="promotion"/>
+						<label for="bishop">Bishop</label>
+					</div>
+
+					<div class="promotion-radio">
+						<input type="radio" value="Rook" id="rook" name="promotion"/>
+						<label for="rook">Rook</label>
+					</div>
+
+				</div>
+				<button id="promotion-btn">Promote</button>
+			</div>
+    </div>
+	</body>
+	<script src="./bundle.js"></script>
 </html>

@@ -17,7 +17,7 @@ let game = new chessGame(boardContainer as HTMLElement);
 
 let logic = new ChessBoard();
 
-for (let c of [{y: 1, x: 3}, {y: 6, x: 3}, {y: 7, x: 3}, {y: 7, x: 2}, {y: 7, x: 1}]) {
+for (let c of [{y: 1, x: 3}, {y: 6, x: 3}, {y: 7, x: 3}, {y: 7, x: 2}, {y: 7, x: 1}, {y: 1, x: 1}, {y: 0, x: 1}]) {
 	game.removePiece(c)
 }
 

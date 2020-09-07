@@ -1,5 +1,5 @@
 import { Subject } from './observer';
-import { coord, SQUARE, PIECE, Square } from './declarations';
+import { coord, SQUARE, PIECE, Square, move } from './declarations';
 import { BoardState } from './declarations';
 import { BOARD_SIZE } from './LOGICchessBoard';
 import { Piece } from './piece';
@@ -13,7 +13,7 @@ export class ChessBoardDOM {
   $squares: HTMLDivElement[][] = [];
   boardState: BoardState = [];
   dropSub: Subject = new Subject();
-  dragStartSub: Subject = new Subject();
+	dragStartSub: Subject = new Subject();
 
   private $currDrag: HTMLImageElement | undefined = undefined;
 
@@ -92,9 +92,9 @@ export class ChessBoardDOM {
     this.emptySquare({ y: y, x: x });
     this.$squares[y][x].appendChild(p.domElement);
     p.domElement;
-  }
+	}
 
-  movePiece(p: coord, to: coord) {
+  movePiece({p, to}: move) {
     // if (p.y p.x)
     let piece = this.getPieceImage({ y: p.y, x: p.x })!;
     this.emptySquare({ y: to.y, x: to.x });
