@@ -148,7 +148,6 @@ export class ChessBoardDOM {
     this.$currDrag = undefined;
   };
 
-  // TODO Use classList for changing classes.
   highlightSq(el: HTMLElement, cssClass: string = 'hovered'): void {
     let elParent = el.parentElement!;
     if (this.isSquare(el)) el.classList.add(cssClass);

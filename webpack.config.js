@@ -1,9 +1,12 @@
 const path = require('path');
 
+const CLIENT = 'src/client',
+  SERVER = 'src/server';
+
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
-  entry: './src/index.ts',
+  entry: `./${CLIENT}/index.ts`,
   output: {
     filename: 'bundle.js',
     publicPath: 'public',
@@ -14,12 +17,12 @@ module.exports = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
-        include: [path.resolve(__dirname, 'src')],
+        include: [path.resolve(__dirname, CLIENT)],
       },
       {
         test: /\.css$/,
-				use: ['style-loader', 'css-loader'],
-				include:[path.resolve(__dirname, 'src')]
+        use: ['style-loader', 'css-loader'],
+        include: [path.resolve(__dirname, CLIENT)],
       },
     ],
   },
