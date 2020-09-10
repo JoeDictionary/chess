@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "webpack-dev-server & start http://localhost:8080/public/",
-    "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "client:dev": "start http://localhost:9000/ && webpack-dev-server --config webpack.config.client.js",
+    "client:watch": "webpack --env.NODE_ENV=watch --config webpack.config.client.js",
+    "server:dev": "webpack --config webpack.config.server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -20,18 +22,27 @@
   },
   "homepage": "https://github.com/JoeDictionary/chess#readme",
   "devDependencies": {
+    "@types/express": "^4.17.8",
+    "@types/node": "^14.6.4",
+    "@types/socket.io": "^2.1.11",
     "css-loader": "^3.6.0",
     "cypress": "^5.1.0",
+    "nodemon": "^2.0.4",
+    "nodemon-webpack-plugin": "^4.3.2",
     "style-loader": "^1.2.1",
     "ts-loader": "^7.0.5",
+    "ts-node": "^9.0.0",
     "typedoc": "^0.17.8",
     "typescript": "^3.9.6",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "webpack-shell-plugin-next": "^1.2.0"
   },
   "dependencies": {
+    "@types/socket.io-client": "^1.4.33",
     "express": "^4.17.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "webpack-node-externals": "^2.5.2"
   }
 }
