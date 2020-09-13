@@ -11651,12 +11651,14 @@ let boardContainer = document.querySelector('.board-container');
 let game = new chessGame_1.chessGame(boardContainer);
 let logic = new LOGICchessBoard_1.ChessBoard();
 let socket = socket_io_client_1.default();
+console.log(socket);
 for (let c of [{ y: 1, x: 3 }, { y: 6, x: 3 }, { y: 7, x: 3 }, { y: 7, x: 2 }, { y: 7, x: 1 }, { y: 1, x: 1 }, { y: 0, x: 1 }]) {
     game.removePiece(c);
 }
 debugBtn2.addEventListener('click', () => {
     console.table(game.state);
 });
+// TODO Implement real logic
 debugBtn.addEventListener('click', () => {
     socket.emit('test', {
         message: "Hellooo evernyan! How are you? Fine thsank youu!"

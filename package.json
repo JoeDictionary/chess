@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "client:dev": "start http://localhost:9000/ && webpack-dev-server --config webpack.config.client.js",
+    "client:dev": "start http://localhost:8080/public/ && webpack-dev-server --env.NODE_ENV=dev --config webpack.config.client.js",
     "client:watch": "webpack --env.NODE_ENV=watch --config webpack.config.client.js",
     "server:dev": "webpack --config webpack.config.server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

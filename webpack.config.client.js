@@ -6,12 +6,12 @@ module.exports = env => {
 	console.log("NODE_ENV:", env.NODE_ENV);
 
 	return {
-		watch: env.NODE_ENV === 'watch',
-		devServer: {
+		watch: env.NODE_ENV === 'watch', // For developing with server
+/* 		devServer: {
 			contentBase: path.resolve(__dirname, 'public'),
 			compress: true,
 			port: 9000,
-		},
+		}, */
 		mode: 'development',
 		devtool: 'source-map',
 		entry: {

@@ -13,7 +13,7 @@ export class ChessBoardDOM {
   $squares: HTMLDivElement[][] = [];
   boardState: BoardState = [];
   dropSub: Subject = new Subject();
-	dragStartSub: Subject = new Subject();
+  dragStartSub: Subject = new Subject();
 
   private $currDrag: HTMLImageElement | undefined = undefined;
 
@@ -92,9 +92,9 @@ export class ChessBoardDOM {
     this.emptySquare({ y: y, x: x });
     this.$squares[y][x].appendChild(p.domElement);
     p.domElement;
-	}
+  }
 
-  movePiece({p, to}: move) {
+  movePiece({ p, to }: move) {
     // if (p.y p.x)
     let piece = this.getPieceImage({ y: p.y, x: p.x })!;
     this.emptySquare({ y: to.y, x: to.x });
@@ -176,5 +176,21 @@ export class ChessBoardDOM {
     }
   }
 
-  flipBoard() {}
+  flipElChildren(e: Element) {
+    let children = e.children;
+    for (let i = children.length - 1; i >= 0; i--) {
+      let c = e.removeChild(children[i]);
+      e.appendChild(c);
+    }
+  }
+
+  flipView() {
+    let rows = this.$board.children;
+    // Flip every row
+    for (let row of rows) {
+      this.flipElChildren(row);
+    }
+    // Flip board
+    this.flipElChildren(this.$board);
+  }
 }
