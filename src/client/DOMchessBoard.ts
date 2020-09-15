@@ -29,6 +29,14 @@ export class ChessBoardDOM {
       e.preventDefault();
     });
     this.$board.addEventListener('drop', this.dragDrop);
+	}
+	
+	static flipElChildren(e: Element) {
+    let children = e.children;
+    for (let i = children.length - 1; i >= 0; i--) {
+      let c = e.removeChild(children[i]);
+      e.appendChild(c);
+    }
   }
 
   createSquareDiv(): HTMLDivElement {
@@ -81,7 +89,7 @@ export class ChessBoardDOM {
     const children = this.$squares[y][x].children;
     if (children.length === 1) return children[0] as HTMLImageElement;
     else console.error('Number of elements on square is not 1.');
-  }
+	}
 
   emptySquare({ y, x }: coord) {
     if (this.$squares[y][x]) this.$squares[y][x].innerHTML = '';
@@ -176,21 +184,13 @@ export class ChessBoardDOM {
     }
   }
 
-  flipElChildren(e: Element) {
-    let children = e.children;
-    for (let i = children.length - 1; i >= 0; i--) {
-      let c = e.removeChild(children[i]);
-      e.appendChild(c);
-    }
-  }
-
   flipView() {
     let rows = this.$board.children;
     // Flip every row
     for (let row of rows) {
-      this.flipElChildren(row);
+      ChessBoardDOM.flipElChildren(row);
     }
     // Flip board
-    this.flipElChildren(this.$board);
+    ChessBoardDOM.flipElChildren(this.$board);
   }
 }

@@ -11,7 +11,7 @@ let boardContainer = document.querySelector('.board-container')!;
 let game = new chessGame(boardContainer as HTMLElement);
 let logic = new ChessBoard();
 
-// let socket = io();
+let socket = io();
 
 for (let c of [
   { y: 1, x: 3 },
@@ -31,8 +31,10 @@ debugBtn2.addEventListener('click', () => {
 
 // TODO Implement real logic
 debugBtn.addEventListener('click', () => {
-  /* socket.emit('test', {
+  socket.emit('test', {
 		message: "Hellooo evernyan! How are you? Fine thsank youu!"
-	}) */
-	game.dom.flipView();
+	})
+	// game.dom.flipView();
 });
+
+console.log("prr!!!")

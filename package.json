@@ -4,9 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "client:dev": "start http://localhost:8080/public/ && webpack-dev-server --env.NODE_ENV=dev --config webpack.config.client.js",
+    "client:dev": "start http://localhost:8080 && webpack --env.NODE_ENV=development --config webpack.config.client.js",
+    "client:build": "webpack --env.NODE_ENV=production --config webpack.config.client.js",
     "client:watch": "webpack --env.NODE_ENV=watch --config webpack.config.client.js",
-    "server:dev": "webpack --config webpack.config.server.js",
+    "server:dev": "webpack --env.NODE_ENV=development --config webpack.config.server.js",
+	"server:build": "webpack --env.NODE_ENV=production --config webpack.config.server.js",
+	
+	"cl:dev": "webpack-dev-server --env.NODE_ENV=development --config webpack.config.js --config-name=clientConfig",
+	
+	"cl_serv:dev": "start http://localhost:8080/ & webpack --env.NODE_ENV=development --config webpack.config.js --watch",
+	
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -36,6 +43,7 @@
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
+    "webpack-livereload-plugin": "^2.3.0",
     "webpack-shell-plugin-next": "^1.2.0"
   },
   "dependencies": {

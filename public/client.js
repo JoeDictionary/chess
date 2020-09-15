@@ -11111,6 +11111,13 @@ class ChessBoardDOM {
         });
         this.$board.addEventListener('drop', this.dragDrop);
     }
+    static flipElChildren(e) {
+        let children = e.children;
+        for (let i = children.length - 1; i >= 0; i--) {
+            let c = e.removeChild(children[i]);
+            e.appendChild(c);
+        }
+    }
     createSquareDiv() {
         let $square = document.createElement('div');
         $square.className = 'board-square';
@@ -11202,7 +11209,15 @@ class ChessBoardDOM {
             }
         }
     }
-    flipBoard() { }
+    flipView() {
+        let rows = this.$board.children;
+        // Flip every row
+        for (let row of rows) {
+            ChessBoardDOM.flipElChildren(row);
+        }
+        // Flip board
+        ChessBoardDOM.flipElChildren(this.$board);
+    }
 }
 exports.ChessBoardDOM = ChessBoardDOM;
 
@@ -11651,8 +11666,15 @@ let boardContainer = document.querySelector('.board-container');
 let game = new chessGame_1.chessGame(boardContainer);
 let logic = new LOGICchessBoard_1.ChessBoard();
 let socket = socket_io_client_1.default();
-console.log(socket);
-for (let c of [{ y: 1, x: 3 }, { y: 6, x: 3 }, { y: 7, x: 3 }, { y: 7, x: 2 }, { y: 7, x: 1 }, { y: 1, x: 1 }, { y: 0, x: 1 }]) {
+for (let c of [
+    { y: 1, x: 3 },
+    { y: 6, x: 3 },
+    { y: 7, x: 3 },
+    { y: 7, x: 2 },
+    { y: 7, x: 1 },
+    { y: 1, x: 1 },
+    { y: 0, x: 1 },
+]) {
     game.removePiece(c);
 }
 debugBtn2.addEventListener('click', () => {
@@ -11663,7 +11685,9 @@ debugBtn.addEventListener('click', () => {
     socket.emit('test', {
         message: "Hellooo evernyan! How are you? Fine thsank youu!"
     });
+    // game.dom.flipView();
 });
+console.log("prr!!!");
 
 
 /***/ }),

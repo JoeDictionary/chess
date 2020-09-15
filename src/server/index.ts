@@ -2,7 +2,7 @@ import express from 'express';
 import socket from 'socket.io';
 import path from 'path';
 
-const PORT = 4001;
+const PORT = 8080;
 
 // App setup
 const app = express();
@@ -14,8 +14,6 @@ const server = app.listen(PORT, () => {
 // Static files
 app.use(express.static(path.resolve(__dirname, '../../public')));
 
-
-
 // Socket setup
 let io = socket(server);
 io.on('connection', (socket) => {
@@ -25,4 +23,4 @@ io.on('connection', (socket) => {
 	})
 })
 
-
+console.log("daaamn bretheren")
