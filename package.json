@@ -8,12 +8,9 @@
     "client:build": "webpack --env.NODE_ENV=production --config webpack.config.client.js",
     "client:watch": "webpack --env.NODE_ENV=watch --config webpack.config.client.js",
     "server:dev": "webpack --env.NODE_ENV=development --config webpack.config.server.js",
-	"server:build": "webpack --env.NODE_ENV=production --config webpack.config.server.js",
-	
-	"cl:dev": "webpack-dev-server --env.NODE_ENV=development --config webpack.config.js --config-name=clientConfig",
-	
-	"cl_serv:dev": "start http://localhost:8080/ & webpack --env.NODE_ENV=development --config webpack.config.js --watch",
-	
+    "server:build": "webpack --env.NODE_ENV=production --config webpack.config.server.js",
+    "cl:dev": "webpack-dev-server --env.NODE_ENV=development --config webpack.config.js --config-name=clientConfig",
+    "cl_serv:dev": "start http://localhost:8080/ & webpack --env.NODE_ENV=development --config webpack.config.js --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -32,7 +29,7 @@
     "@types/node": "^14.6.4",
     "@types/socket.io": "^2.1.11",
     "css-loader": "^3.6.0",
-    "cypress": "^5.1.0",
+    "cypress": "^5.2.0",
     "nodemon": "^2.0.4",
     "nodemon-webpack-plugin": "^4.3.2",
     "style-loader": "^1.2.1",
