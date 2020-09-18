@@ -1,5 +1,5 @@
 import { Subject } from './observer';
-import { move, chessAction } from './declarations';
+import { move } from './declarations';
 import { BoardState, coord } from './declarations';
 import { Piece, Rook, Knight, Bishop, Queen, King, Pawn } from './piece';
 

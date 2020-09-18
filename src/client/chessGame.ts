@@ -13,6 +13,7 @@ export class chessGame {
   dom: ChessBoardDOM;
   state: BoardState;
   isWhiteTurn: boolean;
+  socket?: SocketIOClient.Socket;
 
   promoModal: HTMLElement; // Used in pawn promotion
   promoCoord: coord = { y: -1, x: -1 }; // Used in pawn promotion
@@ -49,7 +50,7 @@ export class chessGame {
       if (a.move) this.movePiece(a.move);
       if (a.remove) this.removePiece(a.remove);
       if (a.promote) {
-				this.promoCoord = a.promote;
+        this.promoCoord = a.promote;
         this.promotionPopup(true);
       }
     });
@@ -62,13 +63,15 @@ export class chessGame {
   // TODO Try to move most of it to LOGIC
   turnMovePiece({ p, to }: move) {
     let piece = this.state[p.y][p.x]!;
-    if (!this.logic.turnMovePiece({ p: p, to: to })) return;
-
-    // this.logic.movePiece(p, to);
-    this.dom.movePiece({ p: p, to: to });
+		if (!this.logic.turnMovePiece({ p, to })) return;
+		
+		console.log('turnMove')
+		this.socket?.emit('move', {move: {p, to}})
+    this.dom.movePiece({ p, to });
   }
 
   movePiece(m: move) {
+    this.socket?.emit('move', { move: m });
     this.logic.movePiece(m);
     this.dom.movePiece(m);
   }
@@ -141,5 +144,9 @@ export class chessGame {
         this.dom.highlightSq(this.dom.$squares[m.to.y][m.to.x], 'valid-move');
       }
     }
+  }
+
+  connectSocket(socket: SocketIOClient.Socket) {
+    this.socket = socket;
   }
 }

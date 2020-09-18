@@ -115,11 +115,14 @@ app.use(express_1.default.static(path_1.default.resolve(__dirname, '../../public
 let io = socket_io_1.default(server);
 io.on('connection', (socket) => {
     console.log('New socket connection:', socket.id);
-    socket.on('test', message => {
-        console.log(message.message);
+    socket.on('test', (m) => {
+        console.log(m.message);
+    });
+    socket.on('move', (m) => {
+        console.log(m);
     });
 });
-console.log("daaamn bretheren");
+console.log('daaamn bretheren');
 
 /* WEBPACK VAR INJECTION */}.call(this, "/"))
 

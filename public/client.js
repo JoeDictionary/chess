@@ -11376,13 +11376,17 @@ class chessGame {
     }
     // TODO Try to move most of it to LOGIC
     turnMovePiece({ p, to }) {
+        var _a;
         let piece = this.state[p.y][p.x];
-        if (!this.logic.turnMovePiece({ p: p, to: to }))
+        if (!this.logic.turnMovePiece({ p, to }))
             return;
-        // this.logic.movePiece(p, to);
-        this.dom.movePiece({ p: p, to: to });
+        console.log('turnMove');
+        (_a = this.socket) === null || _a === void 0 ? void 0 : _a.emit('move', { move: { p, to } });
+        this.dom.movePiece({ p, to });
     }
     movePiece(m) {
+        var _a;
+        (_a = this.socket) === null || _a === void 0 ? void 0 : _a.emit('move', { move: m });
         this.logic.movePiece(m);
         this.dom.movePiece(m);
     }
@@ -11447,6 +11451,9 @@ class chessGame {
                 this.dom.highlightSq(this.dom.$squares[m.to.y][m.to.x], 'valid-move');
             }
         }
+    }
+    connectSocket(socket) {
+        this.socket = socket;
     }
 }
 exports.chessGame = chessGame;
@@ -11656,16 +11663,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const LOGICchessBoard_1 = __webpack_require__(/*! ./LOGICchessBoard */ "./src/client/LOGICchessBoard.ts");
 const chessGame_1 = __webpack_require__(/*! ./chessGame */ "./src/client/chessGame.ts");
 const socket_io_client_1 = __importDefault(__webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/lib/index.js"));
 __webpack_require__(/*! ./styles.css */ "./src/client/styles.css");
 let debugBtn = document.querySelector('#debug');
 let debugBtn2 = document.querySelector('#debug2');
 let boardContainer = document.querySelector('.board-container');
-let game = new chessGame_1.chessGame(boardContainer);
-let logic = new LOGICchessBoard_1.ChessBoard();
 let socket = socket_io_client_1.default();
+let game = new chessGame_1.chessGame(boardContainer);
+game.connectSocket(socket);
 for (let c of [
     { y: 1, x: 3 },
     { y: 6, x: 3 },
@@ -11677,17 +11683,16 @@ for (let c of [
 ]) {
     game.removePiece(c);
 }
-debugBtn2.addEventListener('click', () => {
-    console.table(game.state);
-});
 // TODO Implement real logic
 debugBtn.addEventListener('click', () => {
     socket.emit('test', {
-        message: "Hellooo evernyan! How are you? Fine thsank youu!"
+        message: 'Hellooo evernyan! How are you? Fine thsank youu!',
     });
     // game.dom.flipView();
 });
-console.log("prr!!!");
+debugBtn2.addEventListener('click', () => {
+    console.table(game.state);
+});
 
 
 /***/ }),
@@ -11982,7 +11987,6 @@ class Pawn extends Piece {
                 return Object.assign(Object.assign({}, m), { action: { promote: { y: m.to.y, x: m.to.x } } });
             return m;
         });
-        console.log(validMoves);
         return validMoves;
     }
 }

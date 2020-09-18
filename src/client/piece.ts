@@ -324,8 +324,6 @@ export class Pawn extends Piece {
 
       return m;
 		});
-		
-		console.log(validMoves)
 
     return validMoves;
   }

@@ -17,10 +17,15 @@ app.use(express.static(path.resolve(__dirname, '../../public')));
 // Socket setup
 let io = socket(server);
 io.on('connection', (socket) => {
-	console.log('New socket connection:', socket.id);
-	socket.on('test', message => {
-		console.log(message.message)
-	})
-})
+  console.log('New socket connection:', socket.id);
 
-console.log("daaamn bretheren")
+  socket.on('test', (m) => {
+    console.log(m.message);
+  });
+
+  socket.on('move', (m) => {
+    console.log(m);
+  });
+});
+
+console.log('daaamn bretheren');

@@ -10,8 +10,9 @@
     "server:dev": "webpack --env.NODE_ENV=development --config webpack.config.server.js",
     "server:build": "webpack --env.NODE_ENV=production --config webpack.config.server.js",
     "cl:dev": "webpack-dev-server --env.NODE_ENV=development --config webpack.config.js --config-name=clientConfig",
-    "cl_serv:dev": "start http://localhost:8080/ & webpack --env.NODE_ENV=development --config webpack.config.js --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+	"cl_serv:dev": "start http://localhost:8080/ & webpack --env.NODE_ENV=development --config webpack.config.js --watch",
+	
+    "test": "node_modules/.bin/cypress open"
   },
   "repository": {
     "type": "git",
